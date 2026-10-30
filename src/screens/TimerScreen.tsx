@@ -80,10 +80,10 @@ export function TimerScreen(p: Props) {
             <RotateCcw className="h-6 w-6" />
           </button>
         )}
-        <div className="whitespace-nowrap leading-none" style={{ fontSize: `min(24vw, 12vh, ${88 / (title.length * 0.42)}vw)` }}>
+        <div className="whitespace-nowrap leading-none" style={{ fontSize: `min(24vw, 11vh, ${88 / (title.length * 0.42)}vw)` }}>
           {title}
         </div>
-        <div className="tabular text-[min(36vw,22vh)] leading-[0.9]">
+        <div className="tabular text-[min(50vw,28vh)] leading-[0.9]">
           {formatTime(finished ? view.elapsed : view.phaseLeft)}
         </div>
       </section>
