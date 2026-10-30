@@ -20,9 +20,16 @@
 }
 
 html,
-body,
-#root {
+body {
   height: 100%;
+  background: var(--color-bg);
+}
+
+/* Fijo a la pantalla completa: en la PWA de iOS "100%" se queda corto por abajo */
+#root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
 }
 
 body {
