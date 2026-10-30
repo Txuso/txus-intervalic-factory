@@ -90,7 +90,7 @@ export function TimerScreen(p: Props) {
             <RotateCcw className="h-6 w-6" />
           </button>
         )}
-        {!finished && <RouteProgress progress={view.totalProgress} bolts={config.rounds * config.cycles} />}
+        {!finished && <RouteProgress progress={view.totalProgress} bolts={config.rounds * config.cycles} climberId={config.climberId} />}
         {finished && <ChalkBurst />}
         <div
           className="whitespace-nowrap pt-[1.5vh] leading-none"

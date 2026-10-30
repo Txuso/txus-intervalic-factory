@@ -1,12 +1,17 @@
+import { findClimber } from '../domain/climbers'
+import { ClimberAvatar } from './ClimberAvatar'
+
 interface Props {
   /** 0..1 */
   progress: number
   /** Número de chapas que se dibujan en la vía */
   bolts: number
+  /** Su cara es la cabeza del muñeco; sin escalador, un emoji esforzándose */
+  climberId?: string
 }
 
 /** Croquis vertical: un escalador sube por la vía hasta la reunión según el progreso total */
-export function RouteProgress({ progress, bolts }: Props) {
+export function RouteProgress({ progress, bolts, climberId }: Props) {
   const n = Math.min(Math.max(bolts, 3), 16)
   const p = Math.min(1, Math.max(0, progress))
   return (
@@ -30,17 +35,31 @@ export function RouteProgress({ progress, bolts }: Props) {
           />
         )
       })}
-      {/* Escalador */}
-      <svg
-        className="absolute left-[-3px] transition-[bottom] duration-300 ease-linear"
-        style={{ bottom: `calc(${p * 100}% - 12px)` }}
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+      {/* Escalador: monigote con los brazos arriba y su cara como cabeza */}
+      <div
+        className="absolute left-[-8px] h-[42px] w-[34px] transition-[bottom] duration-300 ease-linear"
+        style={{ bottom: `calc(${p * 100}% - 21px)` }}
       >
-        <circle cx="12" cy="4" r="2.6" fill="#000" />
-        <path d="M12 7v7M12 9l-4-4M12 9l4-3M12 14l-4 4v3M12 14l4 3 1 3" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      </svg>
+        <svg width="34" height="42" viewBox="0 0 34 42" className="absolute inset-0">
+          <path
+            d="M17 22v10M17 24 6 13l-3-7M17 24l11-10 3-7M17 32l-5 5v4M17 32l5 4 1 5"
+            stroke="#000"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+        </svg>
+        <span className="absolute top-0 left-1/2 flex -translate-x-1/2 items-center justify-center">
+          {findClimber(climberId) ? (
+            <span className="rounded-full ring-2 ring-black">
+              <ClimberAvatar climberId={climberId} size={22} />
+            </span>
+          ) : (
+            <span className="text-[21px] leading-none">😣</span>
+          )}
+        </span>
+      </div>
     </div>
   )
 }

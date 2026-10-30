@@ -29,7 +29,7 @@ function fields(c: TimerConfig): Field[] {
     { key: 'rounds', kind: 'count', title: 'Chapas', subtitle: 'Una chapa es apretar + reposar', icon: <span className="flex w-[30px] justify-center"><Quickdraw color="var(--color-rounds)" size={30} /></span>, min: 1 },
     { key: 'cycles', kind: 'count', title: 'Largos', subtitle: `Un largo son ${c.rounds} chapas`, icon: <Pinch color="var(--color-cycles)" />, min: 1 },
     { key: 'cycleRest', kind: 'time', title: 'Reunión', subtitle: 'Descanso entre largos', icon: <Crimp color="var(--color-cycles)" />, min: 0 },
-    { key: 'cooldown', kind: 'time', title: 'Rapel', subtitle: 'Vuelta a la calma al terminar', icon: <Pocket color="var(--color-cooldown)" />, min: 0 },
+    { key: 'cooldown', kind: 'time', title: 'Ir al bar', subtitle: 'Vuelta a la calma al terminar', icon: <Pocket color="var(--color-cooldown)" />, min: 0 },
   ]
 }
 

@@ -33,7 +33,7 @@ export const PHASE_LABEL: Record<PhaseType, string> = {
   work: '¡Apreta!',
   rest: 'Reposa',
   cycleRest: 'Reunión',
-  cooldown: 'Rapel',
+  cooldown: 'Ir al bar',
 }
 
 /** Frases de voz por fase; se elige una al azar sin repetir la anterior */
@@ -43,7 +43,7 @@ export const PHASE_VOICE: Record<PhaseType, string[]> = {
   work: ['¡Apreta!', '¡Aupa!', '¡Vinga bou!', '¡Egurre!', '¡Alé!', '¡Venga, venga!'],
   rest: ['Reposa', 'Sacude'],
   cycleRest: ['Reunión'],
-  cooldown: ['Rapel'],
+  cooldown: ['¡Ir al bar!'],
 }
 
 /** Índice al azar en [0, count) distinto de `last` cuando hay más de una opción */
