@@ -1,4 +1,4 @@
-import { Check, RotateCcw, Save, Square } from 'lucide-react'
+import { Check, RotateCcw, Save, Square, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { NamePrompt } from '../components/NamePrompt'
 import { ScreenHeader } from '../components/ScreenHeader'
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function HistoryScreen({ onBack, onRepeat }: Props) {
-  const { history, saveHistoryAsConfig } = useStore()
+  const { history, saveHistoryAsConfig, deleteHistory } = useStore()
   const [saving, setSaving] = useState<HistoryEntry | null>(null)
   const [savedId, setSavedId] = useState<string | null>(null)
 
@@ -63,6 +63,13 @@ export function HistoryScreen({ onBack, onRepeat }: Props) {
               >
                 <Save className="h-5 w-5" />
                 {savedId === h.id ? 'Guardado' : 'Guardar con nombre'}
+              </button>
+              <button
+                onClick={() => confirm('¿Eliminar este entreno del historial?') && deleteHistory(h.id)}
+                aria-label="Eliminar"
+                className="flex w-14 items-center justify-center rounded-lg bg-btn text-rest active:opacity-70"
+              >
+                <Trash2 className="h-5 w-5" />
               </button>
             </div>
           </li>

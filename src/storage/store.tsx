@@ -52,6 +52,7 @@ interface StoreValue {
   upsertConfig: (c: TimerConfig) => void
   deleteConfig: (id: string) => void
   addHistory: (e: HistoryEntry) => void
+  deleteHistory: (id: string) => void
   saveHistoryAsConfig: (entryId: string, name: string) => TimerConfig | undefined
   updateSettings: (patch: Partial<Settings>) => void
   exportData: () => string
@@ -83,6 +84,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const addHistory = useCallback((e: HistoryEntry) => {
     setHistory((list) => [e, ...list].slice(0, HISTORY_MAX))
+  }, [])
+
+  const deleteHistory = useCallback((id: string) => {
+    setHistory((list) => list.filter((h) => h.id !== id))
   }, [])
 
   const saveHistoryAsConfig = useCallback(
@@ -119,9 +124,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const value = useMemo<StoreValue>(
     () => ({
       configs, history, settings, current, setCurrent, upsertConfig, deleteConfig,
-      addHistory, saveHistoryAsConfig, updateSettings, exportData, importData,
+      addHistory, deleteHistory, saveHistoryAsConfig, updateSettings, exportData, importData,
     }),
-    [configs, history, settings, current, upsertConfig, deleteConfig, addHistory, saveHistoryAsConfig, updateSettings, exportData, importData],
+    [configs, history, settings, current, upsertConfig, deleteConfig, addHistory, deleteHistory, saveHistoryAsConfig, updateSettings, exportData, importData],
   )
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
