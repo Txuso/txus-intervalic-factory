@@ -1,0 +1,101 @@
+@import "tailwindcss";
+@import "@fontsource/bebas-neue";
+
+@theme {
+  --font-display: "Bebas Neue", "Arial Narrow", system-ui, sans-serif;
+
+  --color-bg: #1a1a1a;
+  --color-panel: #1f1f1f;
+  --color-line: #2c2c2c;
+  --color-muted: #8a8a8a;
+  --color-btn: #3a3a3a;
+
+  --color-prepare: #ffff40;
+  --color-work: #99ff4a;
+  --color-rest: #f2392b;
+  --color-rounds: #3aa8e4;
+  --color-cycles: #ffff40;
+  --color-cooldown: #b57cff;
+  --color-accent: #ffff40;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: #fff;
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+input {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 12px);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+input[type="range"].volume {
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--color-accent) var(--fill), var(--color-btn) var(--fill));
+}
+input[type="range"].volume::-webkit-slider-thumb {
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
+}
+input[type="range"].volume:disabled {
+  opacity: 0.35;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+.animate-sheet {
+  animation: sheet-up 0.22s ease-out;
+}
+
+@keyframes splash-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+.animate-splash {
+  animation: splash-out 0.35s ease-in 0.9s forwards;
+}
