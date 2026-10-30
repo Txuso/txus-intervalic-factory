@@ -109,3 +109,15 @@ input[type="range"].volume:disabled {
 .animate-splash {
   animation: splash-out 0.35s ease-in 0.9s forwards;
 }
+
+/* Textura de roca muy sutil para los fondos oscuros */
+.rock {
+  background-color: var(--color-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.09 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Cuerda: trenzado en diagonal */
+.rope {
+  background: repeating-linear-gradient(-55deg, #ffff40 0 3px, #c2452d 3px 5px, #ffff40 5px 8px, #1a1a1a 8px 9px);
+  border-radius: 999px;
+}

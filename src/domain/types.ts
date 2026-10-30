@@ -11,6 +11,9 @@ export interface TimerConfig {
   cycles: number
   cycleRest: number
   cooldown: number
+  /** Grado francés de broma, sorteado al crear el entreno */
+  grade: string
+  climberId?: string
 }
 
 export interface Phase {

@@ -1,5 +1,6 @@
 import { Copy, Pencil, Timer, Trash2 } from 'lucide-react'
 import { Brand } from '../components/Brand'
+import { ClimberAvatar } from '../components/ClimberAvatar'
 import { ScreenHeader } from '../components/ScreenHeader'
 import { formatTime } from '../domain/format'
 import { totalDuration } from '../domain/sequence'
@@ -15,7 +16,7 @@ interface Props {
 }
 
 export function summary(c: TimerConfig) {
-  const cycles = c.cycles > 1 ? ` · ${c.cycles} ciclos` : ''
+  const cycles = c.cycles > 1 ? ` · ${c.cycles} largos` : ''
   return `${c.rounds}× ${formatTime(c.work)} / ${formatTime(c.rest)}${cycles}`
 }
 
@@ -27,7 +28,7 @@ export function LibraryScreen({ onBack, onSelect, onEdit, onDuplicate, onNew }: 
   }
 
   return (
-    <div className="no-scrollbar h-full overflow-y-auto bg-bg">
+    <div className="rock no-scrollbar h-full overflow-y-auto">
       <ScreenHeader title="Mis entrenos" onBack={onBack} />
       <Brand size={110} />
 
@@ -35,12 +36,20 @@ export function LibraryScreen({ onBack, onSelect, onEdit, onDuplicate, onNew }: 
         {configs.map((c) => (
           <li key={c.id} className="flex items-center border-b border-line">
             <button onClick={() => onSelect(c)} className="flex min-w-0 flex-1 items-center gap-3 px-4 py-4 text-left active:bg-white/5">
-              <span
-                className="h-4 w-4 shrink-0 rounded-full"
-                style={{ background: c.id === current.id ? 'var(--color-accent)' : 'var(--color-btn)' }}
-              />
+              {c.climberId ? (
+                <ClimberAvatar climberId={c.climberId} size={44} ring={c.id === current.id} />
+              ) : (
+                <span className="flex w-[44px] shrink-0 justify-center">
+                  <span
+                    className="h-4 w-4 rounded-full"
+                    style={{ background: c.id === current.id ? 'var(--color-accent)' : 'var(--color-btn)' }}
+                  />
+                </span>
+              )}
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[1.7rem] leading-none">{c.name}</span>
+                <span className="block truncate text-[1.7rem] leading-none">
+                  {c.name} <span className="text-white/60">{c.grade}</span>
+                </span>
                 <span className="mt-1 block text-base leading-none text-muted">
                   {summary(c)} · <span className="text-accent">{formatTime(totalDuration(c))}</span>
                 </span>

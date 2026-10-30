@@ -1,5 +1,9 @@
 import { History, LayoutGrid, Pause, Pencil, Play, RotateCcw, Settings } from 'lucide-react'
+import { ChalkBurst } from '../components/ChalkBurst'
+import { ClimberAvatar } from '../components/ClimberAvatar'
 import { ProgressRing } from '../components/ProgressRing'
+import { Quickdraws } from '../components/Quickdraws'
+import { RouteProgress } from '../components/RouteProgress'
 import { formatTime } from '../domain/format'
 import { PHASE_COLOR, PHASE_LABEL } from '../domain/sequence'
 import type { TimerConfig } from '../domain/types'
@@ -18,7 +22,7 @@ interface Props {
   onEdit: () => void
 }
 
-const iconBtn = 'flex h-11 w-11 items-center justify-center text-accent active:opacity-60'
+const iconBtn = 'flex h-11 w-10 items-center justify-center text-accent active:opacity-60'
 
 export function TimerScreen(p: Props) {
   const { view, config } = p
@@ -26,7 +30,7 @@ export function TimerScreen(p: Props) {
   const active = view.status === 'running' || view.status === 'paused'
   const panelColor = finished ? 'var(--color-accent)' : view.phase ? PHASE_COLOR[view.phase.type] : 'var(--color-btn)'
 
-  const title = finished ? '¡Terminado!' : view.phase ? PHASE_LABEL[view.phase.type] : ''
+  const title = finished ? '¡Encadenado!' : view.phase ? PHASE_LABEL[view.phase.type] : ''
 
   const center = {
     idle: { icon: <Play className="h-12 w-12 translate-x-0.5 fill-current" />, label: 'Empezar', action: p.onStart },
@@ -36,15 +40,15 @@ export function TimerScreen(p: Props) {
   }[view.status]
 
   const reset = () => {
-    if (active && !confirm('¿Terminar el entreno? Se guardará en el historial como parado.')) return
+    if (active && !confirm('¿Terminar el entreno? Se guardará en el historial como proyecto.')) return
     p.onReset()
   }
 
   return (
-    <div className="flex h-full flex-col bg-bg">
+    <div className="rock flex h-full flex-col">
       <header className="pt-safe">
         <div className="flex items-center px-2 py-1">
-          <div className="flex w-24">
+          <div className="flex w-20">
             <button className={iconBtn} onClick={p.onOpenLibrary} aria-label="Mis entrenos">
               <LayoutGrid className="h-6 w-6" />
             </button>
@@ -53,10 +57,16 @@ export function TimerScreen(p: Props) {
             </button>
           </div>
           <div className="min-w-0 flex-1 text-center text-accent">
-            <div className="truncate text-2xl leading-tight">{config.name}</div>
-            <div className="tabular text-4xl leading-none">{formatTime(finished ? view.elapsed : view.totalLeft)}</div>
+            <div className="flex items-center justify-center gap-2">
+              <ClimberAvatar climberId={config.climberId} size={26} />
+              <span className="truncate text-2xl leading-tight">{config.name}</span>
+            </div>
+            <div className="flex items-baseline justify-center gap-2 leading-none">
+              <span className="tabular text-4xl">{formatTime(finished ? view.elapsed : view.totalLeft)}</span>
+              <span className="text-2xl text-white/70">{config.grade}</span>
+            </div>
           </div>
-          <div className="flex w-24 justify-end">
+          <div className="flex w-20 justify-end">
             <button className={iconBtn} onClick={p.onEdit} aria-label="Editar">
               <Pencil className="h-6 w-6" />
             </button>
@@ -80,15 +90,24 @@ export function TimerScreen(p: Props) {
             <RotateCcw className="h-6 w-6" />
           </button>
         )}
+        {!finished && <RouteProgress progress={view.totalProgress} bolts={config.rounds * config.cycles} />}
+        {finished && <ChalkBurst />}
         <div
           className="whitespace-nowrap pt-[1.5vh] leading-none"
           style={{ fontSize: `min(24vw, 10vh, ${88 / (title.length * 0.42)}vw)` }}
         >
           {title}
         </div>
-        <div className="tabular flex flex-1 items-center text-[min(53vw,28vh)] leading-[0.9]">
-          {formatTime(finished ? view.elapsed : view.phaseLeft)}
-        </div>
+        {finished ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-[1vh]">
+            {config.climberId && <ClimberAvatar climberId={config.climberId} size={Math.round(Math.min(innerWidth * 0.36, innerHeight * 0.17))} ring />}
+            <div className="tabular text-[min(32vw,15vh)] leading-[0.9]">{formatTime(view.elapsed)}</div>
+          </div>
+        ) : (
+          <div className="tabular flex flex-1 items-center text-[min(53vw,28vh)] leading-[0.9]">
+            {formatTime(view.phaseLeft)}
+          </div>
+        )}
       </section>
 
       <section
@@ -101,14 +120,24 @@ export function TimerScreen(p: Props) {
             <div className="tabular text-[min(20vw,11vh)] leading-[0.95]">{formatTime(view.next.duration)}</div>
           </>
         ) : (
-          <div className="py-2 text-[min(9vw,5vh)] leading-none text-white">{finished ? 'Buen trabajo' : 'Última fase'}</div>
+          <div className="py-2 text-[min(9vw,5vh)] leading-none text-white">
+            {finished ? (
+              <>
+                Has encadenado un <span className="text-accent">{config.grade}</span>
+              </>
+            ) : (
+              'Última fase'
+            )}
+          </div>
         )}
       </section>
 
-      <footer className="pb-safe grid grid-cols-3 items-center pt-4">
+      <Quickdraws total={config.rounds} clipped={config.rounds - view.roundsLeft} />
+
+      <footer className="pb-safe grid grid-cols-3 items-center pt-2">
         <div className="flex flex-col items-center">
           <span className="tabular text-[min(20vw,11vh)] leading-none text-rounds">{view.roundsLeft}</span>
-          <span className="text-center text-[min(5.5vw,1.25rem)] leading-tight">Rondas restantes</span>
+          <span className="text-center text-[min(5.5vw,1.25rem)] leading-tight">Chapas restantes</span>
         </div>
         <div className="flex flex-col items-center">
           <button onClick={center.action} className="text-accent active:scale-95" aria-label={center.label}>
@@ -128,7 +157,7 @@ export function TimerScreen(p: Props) {
         </div>
         <div className="flex flex-col items-center">
           <span className="tabular text-[min(20vw,11vh)] leading-none text-cycles">{view.cyclesLeft}</span>
-          <span className="text-center text-[min(5.5vw,1.25rem)] leading-tight">Ciclos restantes</span>
+          <span className="text-center text-[min(5.5vw,1.25rem)] leading-tight">Largos restantes</span>
         </div>
       </footer>
     </div>

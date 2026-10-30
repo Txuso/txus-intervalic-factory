@@ -1,5 +1,6 @@
 import { Check, RotateCcw, Save, Square, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { ClimberAvatar } from '../components/ClimberAvatar'
 import { NamePrompt } from '../components/NamePrompt'
 import { ScreenHeader } from '../components/ScreenHeader'
 import { formatDate, formatTime } from '../domain/format'
@@ -18,7 +19,7 @@ export function HistoryScreen({ onBack, onRepeat }: Props) {
   const [savedId, setSavedId] = useState<string | null>(null)
 
   return (
-    <div className="no-scrollbar h-full overflow-y-auto bg-bg">
+    <div className="rock no-scrollbar h-full overflow-y-auto">
       <ScreenHeader title="Historial" onBack={onBack} />
       <p className="px-4 pt-3 text-lg text-muted">Últimos {HISTORY_MAX} entrenos</p>
 
@@ -28,8 +29,11 @@ export function HistoryScreen({ onBack, onRepeat }: Props) {
         {history.map((h) => (
           <li key={h.id} className="border-b border-line px-4 py-4">
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="truncate text-3xl leading-none">{h.config.name}</div>
+              <ClimberAvatar climberId={h.config.climberId} size={44} />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-3xl leading-none">
+                  {h.config.name} {h.config.grade && <span className="text-white/60">{h.config.grade}</span>}
+                </div>
                 <div className="mt-1 text-lg leading-none text-muted">
                   {formatDate(h.startedAt)} · {summary(h.config)}
                 </div>
@@ -38,7 +42,7 @@ export function HistoryScreen({ onBack, onRepeat }: Props) {
                 className={`flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-lg leading-none text-black ${h.completed ? 'bg-work' : 'bg-rest'}`}
               >
                 {h.completed ? <Check className="h-4 w-4" strokeWidth={3} /> : <Square className="h-3 w-3 fill-current" />}
-                {h.completed ? 'Completado' : 'Parado'}
+                {h.completed ? 'Encadenado' : 'Proyecto'}
               </span>
             </div>
 
@@ -47,7 +51,7 @@ export function HistoryScreen({ onBack, onRepeat }: Props) {
                 {formatTime(h.elapsed)} <span className="text-muted">/ {formatTime(h.total)}</span>
               </span>
               <span className="tabular text-rounds">
-                Rondas {h.roundsDone}/{h.totalRounds}
+                Chapas {h.roundsDone}/{h.totalRounds}
               </span>
             </div>
 
@@ -62,7 +66,7 @@ export function HistoryScreen({ onBack, onRepeat }: Props) {
                 className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-btn py-3 text-xl text-work active:opacity-70 disabled:text-muted"
               >
                 <Save className="h-5 w-5" />
-                {savedId === h.id ? 'Guardado' : 'Guardar con nombre'}
+                {savedId === h.id ? 'Guardado' : 'Guardar'}
               </button>
               <button
                 onClick={() => confirm('¿Eliminar este entreno del historial?') && deleteHistory(h.id)}

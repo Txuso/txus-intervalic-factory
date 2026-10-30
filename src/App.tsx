@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { setVolume } from './audio/audio'
 import { newId } from './domain/format'
 import { defaultConfig } from './domain/defaults'
+import { randomGrade } from './domain/grades'
 import type { TimerConfig } from './domain/types'
 import { useTimerEngine } from './hooks/useTimerEngine'
 import { useWakeLock } from './hooks/useWakeLock'
@@ -43,7 +44,7 @@ export default function App() {
           onBack={toTimer}
           onSelect={select}
           onEdit={(c) => setScreen({ name: 'editor', config: c, isNew: false, back: 'library' })}
-          onDuplicate={(c) => store.upsertConfig({ ...c, id: newId(), name: `${c.name} (copia)` })}
+          onDuplicate={(c) => store.upsertConfig({ ...c, id: newId(), name: `${c.name} (copia)`, grade: randomGrade() })}
           onNew={() => setScreen({ name: 'editor', config: { ...defaultConfig(), name: '' }, isNew: true, back: 'library' })}
         />
       )
@@ -61,7 +62,7 @@ export default function App() {
           isNew={screen.isNew}
           onCancel={() => setScreen(screen.back === 'timer' ? { name: 'timer' } : { name: 'library' })}
           onSave={(c, asNew) => {
-            const saved = asNew ? { ...c, id: newId() } : c
+            const saved = asNew ? { ...c, id: newId(), grade: randomGrade() } : c
             store.upsertConfig(saved)
             select(saved)
           }}

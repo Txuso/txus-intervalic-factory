@@ -131,7 +131,7 @@ export function cueFinish(s: AlertSettings) {
     tone(1320, 200, 280)
     tone(1760, 600, 560)
   }
-  if (s.voice) speak('¡Terminado! Buen trabajo')
+  if (s.voice) speak('¡Encadenado!')
   if (s.vibration) vibrate([300, 150, 300, 150, 600])
 }
 

@@ -60,7 +60,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <div className="no-scrollbar h-full overflow-y-auto bg-bg">
+    <div className="rock no-scrollbar h-full overflow-y-auto">
       <ScreenHeader title="Ajustes" onBack={onBack} />
       <Brand size={110} />
 

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { cueFinish, cuePhase, cueTick, unlockAudio } from '../audio/audio'
 import { newId } from '../domain/format'
-import { buildSequence, PHASE_VOICE } from '../domain/sequence'
-import type { HistoryEntry, Phase, Settings, TimerConfig } from '../domain/types'
+import { buildSequence, PHASE_VOICE, pickPhrase } from '../domain/sequence'
+import type { HistoryEntry, Phase, PhaseType, Settings, TimerConfig } from '../domain/types'
 
 export type TimerStatus = 'idle' | 'running' | 'paused' | 'finished'
 
@@ -14,6 +14,8 @@ export interface TimerView {
   phaseLeft: number
   /** 0..1 dentro de la fase actual */
   phaseProgress: number
+  /** 0..1 del entreno completo */
+  totalProgress: number
   totalLeft: number
   elapsed: number
   roundsLeft: number
@@ -54,8 +56,16 @@ export function useTimerEngine(
   const seqRef = useRef(seq)
   const configRef = useRef(config)
   const onRecordRef = useRef(onRecord)
+  const lastVoiceRef = useRef<Partial<Record<PhaseType, number>>>({})
   settingsRef.current = settings
   onRecordRef.current = onRecord
+
+  const voiceFor = (type: PhaseType) => {
+    const list = PHASE_VOICE[type]
+    const i = pickPhrase(list.length, lastVoiceRef.current[type] ?? -1)
+    lastVoiceRef.current[type] = i
+    return list[i]
+  }
 
   const go = (s: TimerStatus) => {
     statusRef.current = s
@@ -143,7 +153,7 @@ export function useTimerEngine(
       endAtRef.current = end
       lastTickSecRef.current = null
       setIndex(idx)
-      cuePhase(settingsRef.current, PHASE_VOICE[phase.type])
+      cuePhase(settingsRef.current, voiceFor(phase.type))
     } else if (secLeft >= 1 && secLeft <= 3 && secLeft < phase.duration && lastTickSecRef.current !== secLeft) {
       lastTickSecRef.current = secLeft
       cueTick(settingsRef.current)
@@ -173,7 +183,7 @@ export function useTimerEngine(
     setIndex(0)
     setRemainingMs(sq[0].duration * 1000)
     go('running')
-    cuePhase(settingsRef.current, PHASE_VOICE[sq[0].type])
+    cuePhase(settingsRef.current, voiceFor(sq[0].type))
   }, [])
 
   const pause = useCallback(() => {
@@ -202,6 +212,7 @@ export function useTimerEngine(
 
   const phase = seq[index]
   const phaseLeft = status === 'finished' ? 0 : Math.ceil(Math.max(0, remainingMs) / 1000)
+  const elapsed = status === 'finished' ? suffix[0] : elapsedAt(index, remainingMs)
   const view: TimerView = {
     status,
     phase,
@@ -209,7 +220,8 @@ export function useTimerEngine(
     phaseLeft,
     phaseProgress: phase && status !== 'idle' ? Math.min(1, 1 - remainingMs / (phase.duration * 1000)) : 0,
     totalLeft: status === 'finished' ? 0 : Math.ceil(Math.max(0, remainingMs) / 1000 + (suffix[index + 1] ?? 0)),
-    elapsed: status === 'finished' ? suffix[0] : elapsedAt(index, remainingMs),
+    elapsed,
+    totalProgress: suffix[0] ? Math.min(1, elapsed / suffix[0]) : 0,
     roundsLeft: status === 'finished' ? 0 : (phase?.roundsLeft ?? 0),
     cyclesLeft: status === 'finished' ? 0 : (phase?.cyclesLeft ?? 0),
   }

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { buildSequence, totalDuration } from './sequence'
+import { buildSequence, pickPhrase, totalDuration } from './sequence'
 import { formatTime } from './format'
 import type { TimerConfig } from './types'
 
 const base: TimerConfig = {
-  id: 'x', name: 'Test',
+  id: 'x', name: 'Test', grade: '7a',
   prepare: 5, work: 30, rest: 5, rounds: 8, cycles: 3, cycleRest: 4, cooldown: 0,
 }
 
@@ -42,5 +42,22 @@ describe('formatTime', () => {
     expect(formatTime(0)).toBe('00:00')
     expect(formatTime(75)).toBe('01:15')
     expect(formatTime(3725)).toBe('1:02:05')
+  })
+})
+
+describe('pickPhrase', () => {
+  it('nunca repite la última frase cuando hay varias', () => {
+    for (let last = 0; last < 6; last++) {
+      for (const r of [0, 0.2, 0.5, 0.8, 0.999]) {
+        const i = pickPhrase(6, last, () => r)
+        expect(i).not.toBe(last)
+        expect(i).toBeGreaterThanOrEqual(0)
+        expect(i).toBeLessThan(6)
+      }
+    }
+  })
+
+  it('con una sola frase devuelve siempre 0', () => {
+    expect(pickPhrase(1, 0)).toBe(0)
   })
 })

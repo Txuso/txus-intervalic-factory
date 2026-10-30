@@ -29,19 +29,28 @@ export function totalDuration(c: TimerConfig): number {
 }
 
 export const PHASE_LABEL: Record<PhaseType, string> = {
-  prepare: 'Prepárate',
-  work: 'Entrenar',
-  rest: 'Descansar',
-  cycleRest: 'Descanso entre ciclos',
-  cooldown: 'Enfriamiento',
+  prepare: 'Magnesio',
+  work: '¡Apreta!',
+  rest: 'Reposa',
+  cycleRest: 'Reunión',
+  cooldown: 'Rapel',
 }
 
-export const PHASE_VOICE: Record<PhaseType, string> = {
-  prepare: 'Prepárate',
-  work: '¡Entrenar!',
-  rest: 'Descansar',
-  cycleRest: 'Descanso entre ciclos',
-  cooldown: 'Enfriamiento',
+/** Frases de voz por fase; se elige una al azar sin repetir la anterior */
+export const PHASE_VOICE: Record<PhaseType, string[]> = {
+  prepare: ['Magnesio'],
+  // "Allez" escrito como suena: la voz española lo lee mal
+  work: ['¡Apreta!', '¡Aupa!', '¡Vinga bou!', '¡Egurre!', '¡Alé!', '¡Venga, venga!'],
+  rest: ['Reposa', 'Sacude'],
+  cycleRest: ['Reunión'],
+  cooldown: ['Rapel'],
+}
+
+/** Índice al azar en [0, count) distinto de `last` cuando hay más de una opción */
+export function pickPhrase(count: number, last: number, rnd: () => number = Math.random): number {
+  if (count <= 1) return 0
+  const i = Math.floor(rnd() * (count - 1))
+  return i >= last && last >= 0 ? i + 1 : i
 }
 
 export const PHASE_COLOR: Record<PhaseType, string> = {

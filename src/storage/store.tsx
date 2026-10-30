@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { DEFAULT_SETTINGS, defaultConfig } from '../domain/defaults'
+import { DEFAULT_SETTINGS, defaultConfig, normalizeConfig } from '../domain/defaults'
 import { newId } from '../domain/format'
 import type { HistoryEntry, Settings, TimerConfig } from '../domain/types'
 
@@ -37,7 +37,9 @@ interface InitialState {
 function initialState(): InitialState {
   const configs = load<TimerConfig[] | null>(KEYS.configs, null)
   if (configs) {
-    return { configs, current: load<TimerConfig>(KEYS.current, configs[0] ?? defaultConfig()) }
+    const list = configs.map(normalizeConfig)
+    const saved = load<TimerConfig>(KEYS.current, list[0] ?? defaultConfig())
+    return { configs: list, current: list.find((c) => c.id === saved.id) ?? normalizeConfig(saved) }
   }
   const seed = defaultConfig()
   return { configs: [seed], current: seed }
@@ -94,7 +96,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (entryId: string, name: string) => {
       const entry = history.find((h) => h.id === entryId)
       if (!entry) return undefined
-      const config: TimerConfig = { ...entry.config, id: newId(), name }
+      const config: TimerConfig = normalizeConfig({ ...entry.config, id: newId(), name })
       setConfigs((list) => [...list, config])
       return config
     },
@@ -115,10 +117,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (data?.app !== 'txus-intervalic-factory' || !Array.isArray(data.configs)) {
       throw new Error('El archivo no es una copia de Txus Intervalic Factory')
     }
-    setConfigs(data.configs)
+    setConfigs(data.configs.map(normalizeConfig))
     setHistory(Array.isArray(data.history) ? data.history.slice(0, HISTORY_MAX) : [])
     if (data.settings) setSettings({ ...DEFAULT_SETTINGS, ...data.settings })
-    if (data.configs[0]) setCurrent(data.configs[0])
+    if (data.configs[0]) setCurrent(normalizeConfig(data.configs[0]))
   }, [])
 
   const value = useMemo<StoreValue>(

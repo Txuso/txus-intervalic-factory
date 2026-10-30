@@ -1,16 +1,21 @@
-import { useState } from 'react'
+import { Dices, UserRound } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { BottomSheet } from '../components/BottomSheet'
+import { ClimberAvatar } from '../components/ClimberAvatar'
+import { ChalkBag, Crimp, Jug, Pinch, Pocket, Quickdraw, Sloper } from '../components/Holds'
 import { ParamRow } from '../components/ParamRow'
 import { WheelPicker } from '../components/WheelPicker'
+import { CLIMBERS, findClimber } from '../domain/climbers'
 import { formatTime } from '../domain/format'
+import { randomGrade } from '../domain/grades'
 import { totalDuration } from '../domain/sequence'
 import type { TimerConfig } from '../domain/types'
 
 type TimeKey = 'prepare' | 'work' | 'rest' | 'cycleRest' | 'cooldown'
 type CountKey = 'rounds' | 'cycles'
 type Field =
-  | { key: TimeKey; kind: 'time'; title: string; subtitle: string; color: string; min: number }
-  | { key: CountKey; kind: 'count'; title: string; subtitle: string; color: string; min: number }
+  | { key: TimeKey; kind: 'time'; title: string; subtitle: string; icon: ReactNode; min: number }
+  | { key: CountKey; kind: 'count'; title: string; subtitle: string; icon: ReactNode; min: number }
 
 const SIXTY = Array.from({ length: 60 }, (_, i) => i)
 const COUNTS = Array.from({ length: 99 }, (_, i) => i + 1)
@@ -18,13 +23,13 @@ const pad = (n: number) => String(n).padStart(2, '0')
 
 function fields(c: TimerConfig): Field[] {
   return [
-    { key: 'prepare', kind: 'time', title: 'Prepárate', subtitle: 'Cuenta atrás antes de empezar', color: 'var(--color-prepare)', min: 0 },
-    { key: 'work', kind: 'time', title: 'Entrenar', subtitle: 'Hacer ejercicios durante este tiempo', color: 'var(--color-work)', min: 1 },
-    { key: 'rest', kind: 'time', title: 'Descansar', subtitle: 'Descansar durante este tiempo', color: 'var(--color-rest)', min: 0 },
-    { key: 'rounds', kind: 'count', title: 'Rondas', subtitle: 'Una ronda es ejercicio + descanso', color: 'var(--color-rounds)', min: 1 },
-    { key: 'cycles', kind: 'count', title: 'Ciclos', subtitle: `Un ciclo son ${c.rounds} rondas`, color: 'var(--color-cycles)', min: 1 },
-    { key: 'cycleRest', kind: 'time', title: 'Descansar entre ciclos', subtitle: 'Intervalo de recuperación', color: 'var(--color-cycles)', min: 0 },
-    { key: 'cooldown', kind: 'time', title: 'Enfriamiento', subtitle: 'Vuelta a la calma al terminar', color: 'var(--color-cooldown)', min: 0 },
+    { key: 'prepare', kind: 'time', title: 'Magnesio', subtitle: 'Cuenta atrás antes de empezar', icon: <ChalkBag color="var(--color-prepare)" />, min: 0 },
+    { key: 'work', kind: 'time', title: 'Apreta', subtitle: 'Tiempo de esfuerzo de cada chapa', icon: <Jug color="var(--color-work)" />, min: 1 },
+    { key: 'rest', kind: 'time', title: 'Reposa', subtitle: 'Descanso entre chapas', icon: <Sloper color="var(--color-rest)" />, min: 0 },
+    { key: 'rounds', kind: 'count', title: 'Chapas', subtitle: 'Una chapa es apretar + reposar', icon: <span className="flex w-[30px] justify-center"><Quickdraw color="var(--color-rounds)" size={30} /></span>, min: 1 },
+    { key: 'cycles', kind: 'count', title: 'Largos', subtitle: `Un largo son ${c.rounds} chapas`, icon: <Pinch color="var(--color-cycles)" />, min: 1 },
+    { key: 'cycleRest', kind: 'time', title: 'Reunión', subtitle: 'Descanso entre largos', icon: <Crimp color="var(--color-cycles)" />, min: 0 },
+    { key: 'cooldown', kind: 'time', title: 'Rapel', subtitle: 'Vuelta a la calma al terminar', icon: <Pocket color="var(--color-cooldown)" />, min: 0 },
   ]
 }
 
@@ -40,6 +45,8 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
   const [editing, setEditing] = useState<Field | null>(null)
   const [temp, setTemp] = useState({ min: 0, sec: 0, count: 1 })
   const [nameError, setNameError] = useState(false)
+  const [pickingClimber, setPickingClimber] = useState(false)
+  const climber = findClimber(draft.climberId)
 
   const open = (f: Field) => {
     const v = draft[f.key]
@@ -64,7 +71,7 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
   }
 
   return (
-    <div className="flex h-full flex-col bg-bg">
+    <div className="rock flex h-full flex-col">
       <header className="pt-safe bg-panel">
         <div className="flex items-center justify-between px-5 py-4 text-2xl">
           <button className="text-muted" onClick={onCancel}>
@@ -93,10 +100,31 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
           />
         </label>
 
+        <ParamRow
+          icon={
+            climber ? (
+              <ClimberAvatar climberId={climber.id} size={30} />
+            ) : (
+              <UserRound className="h-[30px] w-[30px] shrink-0 rounded-full bg-btn p-1 text-muted" />
+            )
+          }
+          title="Escalador"
+          subtitle={climber ? climber.name : 'Elige una foto para este entreno'}
+          value={climber ? '' : <span className="text-3xl text-muted">Ninguno</span>}
+          onClick={() => setPickingClimber(true)}
+        />
+        <ParamRow
+          icon={<Dices className="h-[30px] w-[30px] shrink-0 text-accent" />}
+          title="Grado"
+          subtitle="Al azar · toca para volver a tirar"
+          value={<span className="text-accent">{draft.grade}</span>}
+          onClick={() => setDraft((d) => ({ ...d, grade: randomGrade() }))}
+        />
+
         {fields(draft).map((f) => (
           <ParamRow
             key={f.key}
-            color={f.color}
+            icon={f.icon}
             title={f.title}
             subtitle={f.subtitle}
             value={f.kind === 'time' ? formatTime(draft[f.key]) : String(draft[f.key])}
@@ -117,6 +145,31 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
           </div>
         )}
       </div>
+
+      <BottomSheet open={pickingClimber} title="Escalador" confirmLabel="Listo" onCancel={() => setPickingClimber(false)} onConfirm={() => setPickingClimber(false)}>
+        <div className="grid grid-cols-3 gap-4 pb-2">
+          {[...CLIMBERS, undefined].map((c) => {
+            const selected = draft.climberId === c?.id
+            return (
+              <button
+                key={c?.id ?? 'none'}
+                onClick={() => {
+                  setDraft((d) => ({ ...d, climberId: c?.id }))
+                  setPickingClimber(false)
+                }}
+                className="flex flex-col items-center gap-1 active:opacity-70"
+              >
+                {c ? (
+                  <ClimberAvatar climberId={c.id} size={76} ring={selected} />
+                ) : (
+                  <span className={`flex h-[76px] w-[76px] items-center justify-center rounded-full bg-btn text-2xl text-muted ${selected ? 'ring-2 ring-accent' : ''}`}>—</span>
+                )}
+                <span className={`text-center text-lg leading-tight ${selected ? 'text-accent' : ''}`}>{c?.name ?? 'Ninguno'}</span>
+              </button>
+            )
+          })}
+        </div>
+      </BottomSheet>
 
       <BottomSheet open={!!editing} title={editing?.title ?? ''} onCancel={() => setEditing(null)} onConfirm={accept}>
         {editing?.kind === 'time' && (
