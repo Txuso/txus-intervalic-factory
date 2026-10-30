@@ -68,22 +68,25 @@ export function TimerScreen(p: Props) {
       </header>
 
       <section
-        className="relative mt-2 flex flex-1 flex-col items-center justify-center text-black transition-colors duration-300"
+        className="relative mt-2 flex flex-1 flex-col items-center text-black transition-colors duration-300"
         style={{ background: panelColor }}
       >
         {(active || finished) && (
           <button
             onClick={reset}
             aria-label="Reiniciar"
-            className="absolute -top-5 right-4 flex h-12 w-12 items-center justify-center rounded-full border-2 border-bg bg-[#2a2a2a] text-accent active:opacity-70"
+            className="absolute -top-5 right-4 z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-bg bg-[#2a2a2a] text-accent active:opacity-70"
           >
             <RotateCcw className="h-6 w-6" />
           </button>
         )}
-        <div className="whitespace-nowrap leading-none" style={{ fontSize: `min(24vw, 11vh, ${88 / (title.length * 0.42)}vw)` }}>
+        <div
+          className="whitespace-nowrap pt-[1.5vh] leading-none"
+          style={{ fontSize: `min(24vw, 10vh, ${88 / (title.length * 0.42)}vw)` }}
+        >
           {title}
         </div>
-        <div className="tabular text-[min(50vw,28vh)] leading-[0.9]">
+        <div className="tabular flex flex-1 items-center text-[min(53vw,28vh)] leading-[0.9]">
           {formatTime(finished ? view.elapsed : view.phaseLeft)}
         </div>
       </section>
@@ -94,8 +97,8 @@ export function TimerScreen(p: Props) {
       >
         {view.next ? (
           <>
-            <div className="text-[min(9vw,5vh)] leading-none">{PHASE_LABEL[view.next.type]}:</div>
-            <div className="tabular text-[min(16vw,9vh)] leading-none">{formatTime(view.next.duration)}</div>
+            <div className="text-[min(7vw,4vh)] leading-none">{PHASE_LABEL[view.next.type]}</div>
+            <div className="tabular text-[min(20vw,11vh)] leading-[0.95]">{formatTime(view.next.duration)}</div>
           </>
         ) : (
           <div className="py-2 text-[min(9vw,5vh)] leading-none text-white">{finished ? 'Buen trabajo' : 'Última fase'}</div>
@@ -109,11 +112,19 @@ export function TimerScreen(p: Props) {
         </div>
         <div className="flex flex-col items-center">
           <button onClick={center.action} className="text-accent active:scale-95" aria-label={center.label}>
-            <ProgressRing progress={view.phaseProgress} size={110} stroke={11}>
-              {center.icon}
-            </ProgressRing>
+            {view.status === 'idle' || finished ? (
+              <span className="flex h-[112px] w-[112px] items-center justify-center rounded-full bg-accent text-black">
+                <span className="flex h-[96px] w-[96px] items-center justify-center rounded-full border-2 border-black">
+                  {center.icon}
+                </span>
+              </span>
+            ) : (
+              <ProgressRing progress={view.phaseProgress} size={112} stroke={11}>
+                {center.icon}
+              </ProgressRing>
+            )}
           </button>
-          <span className="text-xl text-accent">{center.label}</span>
+          <span className="text-2xl text-accent">{center.label}</span>
         </div>
         <div className="flex flex-col items-center">
           <span className="tabular text-[min(20vw,11vh)] leading-none text-cycles">{view.cyclesLeft}</span>
