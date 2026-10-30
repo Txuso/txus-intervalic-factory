@@ -21,14 +21,17 @@
 
 html,
 body {
-  height: 100%;
+  height: 100vh;
   background: var(--color-bg);
 }
 
-/* Fijo a la pantalla completa: en la PWA de iOS "100%" se queda corto por abajo */
+/* Altura fija de pantalla completa. --app-h la corrige en la PWA de iOS (ver viewport.ts) */
 #root {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--app-h, 100vh);
   overflow: hidden;
 }
 
