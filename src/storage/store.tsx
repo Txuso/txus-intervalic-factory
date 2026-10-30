@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { DEFAULT_SETTINGS, defaultConfig, normalizeConfig } from '../domain/defaults'
+import { DEFAULT_SETTINGS, defaultConfig, normalizeConfig, withPresets } from '../domain/defaults'
 import { newId } from '../domain/format'
 import type { HistoryEntry, Settings, TimerConfig } from '../domain/types'
 
@@ -8,6 +8,7 @@ const KEYS = {
   history: 'tif.history',
   settings: 'tif.settings',
   current: 'tif.current',
+  presets: 'tif.presets',
 }
 export const HISTORY_MAX = 10
 const EXPORT_VERSION = 1
@@ -35,14 +36,14 @@ interface InitialState {
 }
 
 function initialState(): InitialState {
-  const configs = load<TimerConfig[] | null>(KEYS.configs, null)
-  if (configs) {
-    const list = configs.map(normalizeConfig)
+  const stored = load<TimerConfig[] | null>(KEYS.configs, null)
+  const { list, offered } = withPresets((stored ?? [defaultConfig()]).map(normalizeConfig), load<string[]>(KEYS.presets, []))
+  save(KEYS.presets, offered)
+  if (stored) {
     const saved = load<TimerConfig>(KEYS.current, list[0] ?? defaultConfig())
     return { configs: list, current: list.find((c) => c.id === saved.id) ?? normalizeConfig(saved) }
   }
-  const seed = defaultConfig()
-  return { configs: [seed], current: seed }
+  return { configs: list, current: list[0] }
 }
 
 interface StoreValue {
