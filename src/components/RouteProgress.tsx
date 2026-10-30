@@ -15,7 +15,7 @@ export function RouteProgress({ progress, bolts, climberId }: Props) {
   const n = Math.min(Math.max(bolts, 3), 16)
   const p = Math.min(1, Math.max(0, progress))
   return (
-    <div className="pointer-events-none absolute top-[12%] bottom-[6%] left-[6px] w-[18px]" aria-hidden>
+    <div className="pointer-events-none absolute top-[12%] bottom-[6%] left-[18px] w-[18px]" aria-hidden>
       {/* Reunión */}
       <svg className="absolute -top-[18px] left-0" width="18" height="16" viewBox="0 0 18 16">
         <circle cx="5" cy="4" r="2.4" fill="none" stroke="#000" strokeWidth="1.6" opacity=".55" />
@@ -35,28 +35,28 @@ export function RouteProgress({ progress, bolts, climberId }: Props) {
           />
         )
       })}
-      {/* Escalador: monigote con los brazos arriba y su cara como cabeza */}
+      {/* Escalador: monigote con los brazos arriba y su cara (grande) como cabeza */}
       <div
-        className="absolute left-[-8px] h-[42px] w-[34px] transition-[bottom] duration-300 ease-linear"
-        style={{ bottom: `calc(${p * 100}% - 21px)` }}
+        className="absolute left-[-19px] z-10 h-[54px] w-[56px] transition-[bottom] duration-300 ease-linear"
+        style={{ bottom: `calc(${p * 100}% - 22px)` }}
       >
-        <svg width="34" height="42" viewBox="0 0 34 42" className="absolute inset-0">
+        <svg width="56" height="54" viewBox="0 0 56 54" className="absolute inset-0">
           <path
-            d="M17 22v10M17 24 6 13l-3-7M17 24l11-10 3-7M17 32l-5 5v4M17 32l5 4 1 5"
+            d="M28 32v10M28 31 9 19l-1-10M28 31l19-12 1-10M28 42l-7 6v6M28 42l7 5 1 6"
             stroke="#000"
-            strokeWidth="2.4"
+            strokeWidth="2.8"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
           />
         </svg>
-        <span className="absolute top-0 left-1/2 flex -translate-x-1/2 items-center justify-center">
+        <span className="absolute inset-x-0 top-0 flex justify-center">
           {findClimber(climberId) ? (
-            <span className="rounded-full ring-2 ring-black">
-              <ClimberAvatar climberId={climberId} size={22} />
+            <span className="flex rounded-full ring-2 ring-black">
+              <ClimberAvatar climberId={climberId} size={34} />
             </span>
           ) : (
-            <span className="text-[21px] leading-none">😣</span>
+            <span className="text-[32px] leading-none">😣</span>
           )}
         </span>
       </div>
