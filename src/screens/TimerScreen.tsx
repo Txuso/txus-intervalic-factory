@@ -26,6 +26,8 @@ export function TimerScreen(p: Props) {
   const active = view.status === 'running' || view.status === 'paused'
   const panelColor = finished ? 'var(--color-accent)' : view.phase ? PHASE_COLOR[view.phase.type] : 'var(--color-btn)'
 
+  const title = finished ? '¡Terminado!' : view.phase ? PHASE_LABEL[view.phase.type] : ''
+
   const center = {
     idle: { icon: <Play className="h-12 w-12 translate-x-0.5 fill-current" />, label: 'Empezar', action: p.onStart },
     running: { icon: <Pause className="h-12 w-12 fill-current" />, label: 'Pausa', action: p.onPause },
@@ -78,8 +80,8 @@ export function TimerScreen(p: Props) {
             <RotateCcw className="h-6 w-6" />
           </button>
         )}
-        <div className="text-[min(14vw,8vh)] leading-none">
-          {finished ? '¡Terminado!' : view.phase ? PHASE_LABEL[view.phase.type] : ''}
+        <div className="whitespace-nowrap leading-none" style={{ fontSize: `min(24vw, 12vh, ${88 / (title.length * 0.42)}vw)` }}>
+          {title}
         </div>
         <div className="tabular text-[min(36vw,22vh)] leading-[0.9]">
           {formatTime(finished ? view.elapsed : view.phaseLeft)}
