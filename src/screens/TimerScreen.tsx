@@ -91,14 +91,15 @@ export function TimerScreen(p: Props) {
               <History className="h-6 w-6" />
             </button>
           </div>
-          <div className="min-w-0 flex-1 text-center text-accent">
-            <div className="flex items-center justify-center gap-2">
-              <ClimberAvatar climberId={config.climberId} size={26} />
-              <span className="truncate text-2xl leading-tight">{config.name}</span>
-            </div>
-            <div className="flex items-baseline justify-center gap-2 leading-none">
-              <span className="tabular text-4xl">{formatTime(finished ? view.elapsed : view.totalLeft)}</span>
-              <span className="text-2xl text-white/70">{config.grade}</span>
+          {/* Foto del escalador a la izquierda del nombre y el tiempo, ocupando las dos líneas */}
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-2 text-accent">
+            <ClimberAvatar climberId={config.climberId} size={Math.round(Math.min(48, innerWidth * 0.11))} />
+            <div className="min-w-0 text-center">
+              <div className="truncate text-2xl leading-tight">{config.name}</div>
+              <div className="flex items-baseline justify-center gap-2 leading-none">
+                <span className="tabular text-4xl">{formatTime(finished ? view.elapsed : view.totalLeft)}</span>
+                <span className="text-2xl text-white/70">{config.grade}</span>
+              </div>
             </div>
           </div>
           <div className="flex w-20 justify-end">
