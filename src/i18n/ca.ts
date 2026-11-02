@@ -1,10 +1,10 @@
-import { SHOUTS } from './es'
 import type { Dict } from './types'
+import { SHOUTS } from './es'
 
 export const ca: Dict = {
   locale: 'ca-ES',
   voiceLang: 'ca-ES',
-  phase: { prepare: 'Magnesi', work: 'Apreta!', rest: 'Reposa', cycleRest: 'Reunió', cooldown: 'Anar al bar' },
+  phase: { prepare: 'Magnesi', work: 'Apreta!', rest: 'Reposa', cycleRest: 'Reunió', cooldown: 'Al bar' },
   voice: {
     prepare: ['Magnesi'],
     work: SHOUTS,

@@ -1,15 +1,15 @@
-import { SHOUTS } from './es'
 import type { Dict } from './types'
+import { SHOUTS } from './es'
 
 export const eu: Dict = {
   locale: 'eu-ES',
   voiceLang: 'eu-ES',
-  phase: { prepare: 'Magnesioa', work: 'Estutu!', rest: 'Atseden', cycleRest: 'Erreunioa', cooldown: 'Tabernara' },
+  phase: { prepare: 'Magnesioa', work: 'Estutu!', rest: 'Atseden', cycleRest: 'Bilera', cooldown: 'Tabernara' },
   voice: {
     prepare: ['Magnesioa'],
     work: SHOUTS,
     rest: ['Atseden', 'Astindu'],
-    cycleRest: ['Erreunioa'],
+    cycleRest: ['Bilera'],
     cooldown: ['Tabernara!'],
   },
   voiceFinish: 'Kateatuta!',
@@ -55,7 +55,7 @@ export const eu: Dict = {
     rest: { title: 'Atseden', sub: 'Txapen arteko atsedena' },
     rounds: { title: 'Txapak', sub: 'Txapa bat = estutu + atseden' },
     cycles: { title: 'Luzeak', sub: (n) => `Luze bat ${n} txapa dira` },
-    cycleRest: { title: 'Erreunioa', sub: 'Luzeen arteko atsedena' },
+    cycleRest: { title: 'Bilera', sub: 'Luzeen arteko atsedena' },
     cooldown: { title: 'Tabernara', sub: 'Bukaerako lasaitzea' },
   },
   min: 'Min',
