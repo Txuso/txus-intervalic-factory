@@ -38,6 +38,9 @@ export default function App() {
     setVoiceLang(t.voiceLang)
     document.documentElement.lang = settings.language
   }, [t.voiceLang, settings.language])
+  useEffect(() => {
+    document.documentElement.dataset.rock = settings.rock
+  }, [settings.rock])
   useWakeLock(settings.keepAwake && active)
 
   // Primera visita desde el navegador del móvil: explica cómo instalarla (tras la pantalla de carga)

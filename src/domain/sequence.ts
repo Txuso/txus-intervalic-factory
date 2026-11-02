@@ -42,3 +42,19 @@ export const PHASE_COLOR: Record<PhaseType, string> = {
   cycleRest: 'var(--color-cycles)',
   cooldown: 'var(--color-cooldown)',
 }
+
+/** Cintas chapadas del largo en curso. En la reunión el largo terminado se ve entero chapado. */
+export function clippedCount(phase: Phase | undefined, rounds: number, status: 'idle' | 'running' | 'paused' | 'finished'): number {
+  if (status === 'finished') return rounds
+  if (!phase || status === 'idle') return 0
+  if (phase.type === 'cycleRest') return rounds
+  return rounds - phase.roundsLeft
+}
+
+/** Aviso especial al empezar una serie: la última del largo o la primera del último largo */
+export function lastCall(phase: Phase | undefined, rounds: number, cycles: number): 'lastClip' | 'lastPitch' | null {
+  if (!phase || phase.type !== 'work') return null
+  if (rounds > 1 && phase.roundsLeft === 1) return 'lastClip'
+  if (cycles > 1 && phase.round === 1 && phase.cyclesLeft === 1) return 'lastPitch'
+  return null
+}

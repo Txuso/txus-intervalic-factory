@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { cueFinish, cuePhase, cueTick, startKeepAlive, stopKeepAlive, unlockAudio } from '../audio/audio'
 import { newId } from '../domain/format'
-import { buildSequence, pickPhrase } from '../domain/sequence'
+import { buildSequence, lastCall, pickPhrase } from '../domain/sequence'
 import type { HistoryEntry, Phase, PhaseType, Settings, TimerConfig } from '../domain/types'
 import type { Dict } from '../i18n/types'
 
@@ -64,7 +64,11 @@ export function useTimerEngine(
   tRef.current = t
   onRecordRef.current = onRecord
 
-  const voiceFor = (type: PhaseType) => {
+  const voiceFor = (phase: Phase) => {
+    const cfg = configRef.current
+    const call = lastCall(phase, cfg.rounds, cfg.cycles)
+    if (call) return tRef.current[call]
+    const type = phase.type
     const list = tRef.current.voice[type]
     const i = pickPhrase(list.length, lastVoiceRef.current[type] ?? -1)
     lastVoiceRef.current[type] = i
@@ -160,7 +164,7 @@ export function useTimerEngine(
       endAtRef.current = end
       lastTickSecRef.current = null
       setIndex(idx)
-      cuePhase(settingsRef.current, voiceFor(phase.type))
+      cuePhase(settingsRef.current, voiceFor(phase))
     } else if (secLeft >= 1 && secLeft <= 3 && secLeft < phase.duration && lastTickSecRef.current !== secLeft) {
       lastTickSecRef.current = secLeft
       cueTick(settingsRef.current)
@@ -190,7 +194,7 @@ export function useTimerEngine(
     setIndex(0)
     setRemainingMs(sq[0].duration * 1000)
     go('running')
-    cuePhase(settingsRef.current, voiceFor(sq[0].type))
+    cuePhase(settingsRef.current, voiceFor(sq[0]))
   }, [])
 
   const pause = useCallback(() => {

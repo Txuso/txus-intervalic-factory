@@ -1,19 +1,22 @@
 import { findClimber } from '../domain/climbers'
+import { boltPositions } from '../domain/route'
 import { ClimberAvatar } from './ClimberAvatar'
 
 interface Props {
   /** 0..1 */
   progress: number
-  /** Número de chapas que se dibujan en la vía */
+  /** Series del entreno: una chapa por serie en la vía (entre 3 y 16) */
   bolts: number
+  /** Si se cae: posición (0..1) donde queda colgado. Baja de golpe y rebota en la cuerda */
+  fallTo?: number
   /** Su cara es la cabeza del muñeco; sin escalador, un emoji esforzándose */
   climberId?: string
 }
 
 /** Croquis vertical: un escalador sube por la vía hasta la reunión según el progreso total */
-export function RouteProgress({ progress, bolts, climberId }: Props) {
-  const n = Math.min(Math.max(bolts, 3), 16)
-  const p = Math.min(1, Math.max(0, progress))
+export function RouteProgress({ progress, bolts, climberId, fallTo }: Props) {
+  const falling = fallTo !== undefined
+  const p = Math.min(1, Math.max(0, falling ? fallTo : progress))
   return (
     <div className="pointer-events-none absolute top-[12%] bottom-[6%] left-[4px] w-[18px]" aria-hidden>
       {/* Reunión */}
@@ -25,8 +28,7 @@ export function RouteProgress({ progress, bolts, climberId }: Props) {
       {/* Cuerda: hecha hasta el escalador más marcada */}
       <div className="absolute inset-y-0 left-[8px] w-[2px] rounded bg-black/20" />
       <div className="absolute bottom-0 left-[8px] w-[2px] rounded bg-black/60" style={{ height: `${p * 100}%` }} />
-      {Array.from({ length: n }, (_, i) => {
-        const at = (i + 1) / (n + 1)
+      {boltPositions(bolts).map((at, i) => {
         return (
           <span
             key={i}
@@ -38,7 +40,9 @@ export function RouteProgress({ progress, bolts, climberId }: Props) {
       {/* Escalador: monigote con los brazos arriba y su cara como cabeza. Estrecho (26 px)
           para que la cuenta atrás pueda ir centrada sin taparlo */}
       <div
-        className="absolute left-[-4px] z-10 h-[36px] w-[26px] transition-[bottom] duration-300 ease-linear"
+        className={`absolute left-[-4px] z-10 h-[36px] w-[26px] transition-[bottom] ${
+          falling ? 'animate-rope-bounce duration-[450ms] ease-[cubic-bezier(0.55,0,1,0.45)]' : 'duration-300 ease-linear'
+        } motion-reduce:transition-none`}
         style={{ bottom: `calc(${p * 100}% - 15px)` }}
       >
         <svg width="26" height="36" viewBox="0 0 26 36" className="absolute inset-0">

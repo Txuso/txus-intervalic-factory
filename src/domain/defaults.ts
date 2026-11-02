@@ -64,4 +64,5 @@ export const DEFAULT_SETTINGS: Settings = {
   volume: 0.8,
   keepAwake: true,
   language: detectLang(),
+  rock: 'limestone',
 }

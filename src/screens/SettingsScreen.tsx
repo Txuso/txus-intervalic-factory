@@ -8,7 +8,10 @@ import { Toggle } from '../components/Toggle'
 import { useT } from '../i18n'
 import { LANGS } from '../i18n/lang'
 import { shouldOfferInstall } from '../install'
+import type { RockType } from '../domain/types'
 import { useStore } from '../storage/store'
+
+const ROCKS: RockType[] = ['limestone', 'granite', 'sandstone']
 
 function Row({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   return (
@@ -45,6 +48,22 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
             }`}
           >
             {l.name}
+          </button>
+        ))}
+      </div>
+
+      <h2 className="px-4 pt-2 pb-1 text-xl text-muted">{t.rockTitle}</h2>
+      <div className="grid grid-cols-3 gap-2 px-4 pt-1 pb-4">
+        {ROCKS.map((r) => (
+          <button
+            key={r}
+            onClick={() => updateSettings({ rock: r })}
+            aria-pressed={settings.rock === r}
+            className={`rock rock-${r} flex h-20 items-end justify-center rounded-xl pb-2 text-2xl active:opacity-70 ${
+              settings.rock === r ? 'text-accent ring-2 ring-accent' : 'text-white ring-1 ring-line'
+            }`}
+          >
+            {t.rocks[r]}
           </button>
         ))}
       </div>

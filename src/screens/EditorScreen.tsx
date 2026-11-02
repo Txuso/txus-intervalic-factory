@@ -1,13 +1,14 @@
-import { Dices, UserRound } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { Camera, Dices, UserRound } from 'lucide-react'
+import { useRef, useState, type ReactNode } from 'react'
 import { BottomSheet } from '../components/BottomSheet'
 import { ClimberAvatar } from '../components/ClimberAvatar'
 import { ChalkBag, Crimp, Jug, Pinch, Pocket, Quickdraw, Sloper } from '../components/Holds'
 import { ParamRow } from '../components/ParamRow'
 import { WheelPicker } from '../components/WheelPicker'
-import { CLIMBERS, findClimber } from '../domain/climbers'
+import { CLIMBERS, findClimber, ME_ID } from '../domain/climbers'
 import { formatTime } from '../domain/format'
 import { randomGrade } from '../domain/grades'
+import { fileToAvatar, setMyPhoto, useMyPhoto } from '../domain/myPhoto'
 import { totalDuration } from '../domain/sequence'
 import type { TimerConfig } from '../domain/types'
 import { useT } from '../i18n'
@@ -51,6 +52,24 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
   const [nameError, setNameError] = useState(false)
   const [pickingClimber, setPickingClimber] = useState(false)
   const climber = findClimber(draft.climberId)
+  const myPhoto = useMyPhoto()
+  const photoInput = useRef<HTMLInputElement>(null)
+
+  const pickClimber = (id: string | undefined) => {
+    setDraft((d) => ({ ...d, climberId: id }))
+    setPickingClimber(false)
+  }
+
+  // Foto propia: se recorta en cuadrado y se guarda solo en este móvil
+  const onPhoto = async (file: File | undefined) => {
+    if (!file) return
+    try {
+      setMyPhoto(await fileToAvatar(file))
+      pickClimber(ME_ID)
+    } catch {
+      // Formato que el navegador no sabe leer: se ignora
+    }
+  }
 
   const open = (f: Field) => {
     const v = draft[f.key]
@@ -113,7 +132,7 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
             )
           }
           title={t.climber}
-          subtitle={climber ? climber.name : t.climberPick}
+          subtitle={climber ? (climber.id === ME_ID ? t.me : climber.name) : t.climberPick}
           value={climber ? '' : <span className="text-3xl text-muted">{t.climberNone}</span>}
           onClick={() => setPickingClimber(true)}
         />
@@ -151,28 +170,68 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
       </div>
 
       <BottomSheet open={pickingClimber} title={t.climber} confirmLabel={t.done} onCancel={() => setPickingClimber(false)} onConfirm={() => setPickingClimber(false)}>
-        <div className="grid grid-cols-3 gap-4 pb-2">
-          {[...CLIMBERS, undefined].map((c) => {
-            const selected = draft.climberId === c?.id
-            return (
-              <button
-                key={c?.id ?? 'none'}
-                onClick={() => {
-                  setDraft((d) => ({ ...d, climberId: c?.id }))
-                  setPickingClimber(false)
-                }}
-                className="flex flex-col items-center gap-1 active:opacity-70"
-              >
-                {c ? (
-                  <ClimberAvatar climberId={c.id} size={76} ring={selected} />
-                ) : (
-                  <span className={`flex h-[76px] w-[76px] items-center justify-center rounded-full bg-btn text-2xl text-muted ${selected ? 'ring-2 ring-accent' : ''}`}>—</span>
-                )}
-                <span className={`text-center text-lg leading-tight ${selected ? 'text-accent' : ''}`}>{c?.name ?? t.climberNone}</span>
+        <div className="no-scrollbar max-h-[62vh] overflow-y-auto">
+          <div className="grid grid-cols-4 gap-x-2 gap-y-4 pb-2">
+            <button
+              onClick={() => (myPhoto ? pickClimber(ME_ID) : photoInput.current?.click())}
+              className="flex flex-col items-center gap-1 active:opacity-70"
+            >
+              {myPhoto ? (
+                <ClimberAvatar climberId={ME_ID} size={64} ring={draft.climberId === ME_ID} />
+              ) : (
+                <span className="flex h-[64px] w-[64px] items-center justify-center rounded-full border-2 border-dashed border-accent text-accent">
+                  <Camera className="h-7 w-7" />
+                </span>
+              )}
+              <span className={`text-center text-lg leading-tight ${draft.climberId === ME_ID ? 'text-accent' : ''}`}>
+                {myPhoto ? t.me : t.addPhoto}
+              </span>
+            </button>
+            {[...CLIMBERS, undefined].map((c) => {
+              const selected = draft.climberId === c?.id
+              return (
+                <button key={c?.id ?? 'none'} onClick={() => pickClimber(c?.id)} className="flex flex-col items-center gap-1 active:opacity-70">
+                  {c ? (
+                    <ClimberAvatar climberId={c.id} size={64} ring={selected} />
+                  ) : (
+                    <span
+                      className={`flex h-[64px] w-[64px] items-center justify-center rounded-full bg-btn text-2xl text-muted ${selected ? 'ring-2 ring-accent' : ''}`}
+                    >
+                      —
+                    </span>
+                  )}
+                  <span className={`text-center text-lg leading-tight ${selected ? 'text-accent' : ''}`}>{c?.name ?? t.climberNone}</span>
+                </button>
+              )
+            })}
+          </div>
+          {myPhoto && (
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <button onClick={() => photoInput.current?.click()} className="rounded-lg bg-btn py-3 text-xl text-accent active:opacity-70">
+                {t.changePhoto}
               </button>
-            )
-          })}
+              <button
+                onClick={() => {
+                  setMyPhoto(null)
+                  if (draft.climberId === ME_ID) setDraft((d) => ({ ...d, climberId: undefined }))
+                }}
+                className="rounded-lg bg-btn py-3 text-xl text-rest active:opacity-70"
+              >
+                {t.removePhoto}
+              </button>
+            </div>
+          )}
         </div>
+        <input
+          ref={photoInput}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            void onPhoto(e.target.files?.[0])
+            e.target.value = ''
+          }}
+        />
       </BottomSheet>
 
       <BottomSheet open={!!editing} title={editing?.title ?? ''} onCancel={() => setEditing(null)} onConfirm={accept}>

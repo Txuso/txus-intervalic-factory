@@ -52,4 +52,7 @@ export interface Settings {
   volume: number
   keepAwake: boolean
   language: Lang
+  rock: RockType
 }
+
+export type RockType = 'limestone' | 'granite' | 'sandstone'

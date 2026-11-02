@@ -1,4 +1,6 @@
-import { findClimber } from '../domain/climbers'
+import { findClimber, ME_ID } from '../domain/climbers'
+import { useMyPhoto } from '../domain/myPhoto'
+import { useT } from '../i18n'
 
 interface Props {
   climberId?: string
@@ -8,8 +10,12 @@ interface Props {
 
 /** Foto redonda del escalador, o sus iniciales si falta la foto. Nada si no hay escalador. */
 export function ClimberAvatar({ climberId, size, ring }: Props) {
-  const c = findClimber(climberId)
-  if (!c) return null
+  const t = useT()
+  // Suscripción a la foto propia: al cambiarla se repintan todos los avatares de "Yo"
+  useMyPhoto()
+  const found = findClimber(climberId)
+  if (!found) return null
+  const c = found.id === ME_ID ? { ...found, name: t.me, initials: t.me.toUpperCase() } : found
   const border = ring ? 'ring-2 ring-accent' : ''
   return c.photo ? (
     <img

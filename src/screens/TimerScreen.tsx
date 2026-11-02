@@ -1,4 +1,5 @@
 import { History, LayoutGrid, Pause, Pencil, Play, RotateCcw, Settings } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { ChalkBurst } from '../components/ChalkBurst'
 import { ClimberAvatar } from '../components/ClimberAvatar'
 import { useConfirm } from '../components/ConfirmDialog'
@@ -6,8 +7,9 @@ import { ProgressRing } from '../components/ProgressRing'
 import { Quickdraws } from '../components/Quickdraws'
 import { RouteProgress } from '../components/RouteProgress'
 import { formatTime } from '../domain/format'
-import { findClimber } from '../domain/climbers'
-import { PHASE_COLOR } from '../domain/sequence'
+import { findClimber, ME_ID } from '../domain/climbers'
+import { fallTarget } from '../domain/route'
+import { clippedCount, lastCall, PHASE_COLOR } from '../domain/sequence'
 import type { TimerConfig } from '../domain/types'
 import type { TimerView } from '../hooks/useTimerEngine'
 import { useT } from '../i18n'
@@ -25,6 +27,9 @@ interface Props {
   onEdit: () => void
 }
 
+/** Lo que dura la caída antes de volver al inicio (bajada + rebote en la cuerda) */
+const FALL_MS = 1500
+
 const iconBtn = 'flex h-11 w-10 items-center justify-center text-accent active:opacity-60'
 
 export function TimerScreen(p: Props) {
@@ -34,9 +39,30 @@ export function TimerScreen(p: Props) {
   const climber = findClimber(config.climberId)
   const finished = view.status === 'finished'
   const active = view.status === 'running' || view.status === 'paused'
-  const panelColor = finished ? 'var(--color-accent)' : view.phase ? PHASE_COLOR[view.phase.type] : 'var(--color-btn)'
+  const series = config.rounds * config.cycles
+  // Al parar a medias el escalador se cae por la cuerda antes de volver al inicio
+  const [fallTo, setFallTo] = useState<number | null>(null)
+  const falling = fallTo !== null
+  useEffect(() => {
+    if (!falling) return
+    const id = setTimeout(() => {
+      setFallTo(null)
+      p.onReset()
+    }, FALL_MS)
+    return () => clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [falling])
 
-  const title = finished ? t.finished : view.phase ? t.phase[view.phase.type] : ''
+  const panelColor = falling
+    ? 'var(--color-rest)'
+    : finished
+      ? 'var(--color-accent)'
+      : view.phase
+        ? PHASE_COLOR[view.phase.type]
+        : 'var(--color-btn)'
+
+  const title = falling ? t.project : finished ? t.finished : view.phase ? t.phase[view.phase.type] : ''
+  const call = view.status === 'idle' || finished || falling ? null : lastCall(view.phase, config.rounds, config.cycles)
 
   const center = {
     idle: { icon: <Play className="h-12 w-12 translate-x-0.5 fill-current" />, label: t.start, action: p.onStart },
@@ -46,8 +72,11 @@ export function TimerScreen(p: Props) {
   }[view.status]
 
   const reset = async () => {
-    if (active && !(await confirm({ title: t.resetTitle, message: t.resetMessage, confirmLabel: t.resetConfirm, danger: true }))) return
-    p.onReset()
+    if (falling) return
+    if (!active) return p.onReset()
+    if (!(await confirm({ title: t.resetTitle, message: t.resetMessage, confirmLabel: t.resetConfirm, danger: true }))) return
+    p.onPause()
+    setFallTo(fallTarget(view.totalProgress, series))
   }
 
   return (
@@ -96,7 +125,9 @@ export function TimerScreen(p: Props) {
             <RotateCcw className="h-6 w-6" />
           </button>
         )}
-        {!finished && <RouteProgress progress={view.totalProgress} bolts={config.rounds * config.cycles} climberId={config.climberId} />}
+        {!finished && (
+          <RouteProgress progress={view.totalProgress} bolts={series} climberId={config.climberId} fallTo={fallTo ?? undefined} />
+        )}
         {finished && <ChalkBurst />}
         <div
           className="whitespace-nowrap pt-[1.5vh] leading-none"
@@ -104,12 +135,17 @@ export function TimerScreen(p: Props) {
         >
           {title}
         </div>
+        {call && (
+          <div className="mt-1 rounded-full bg-black px-4 py-1 text-[min(6.5vw,3.2vh)] leading-none text-accent">{t[call]}</div>
+        )}
         {finished ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-[1vh] px-4">
             {climber && (
               <>
                 <ClimberAvatar climberId={climber.id} size={Math.round(Math.min(innerWidth * 0.32, innerHeight * 0.15))} ring />
-                <div className="text-center text-[min(7vw,3.6vh)] leading-[1.05]">{t.proud(climber.name)}</div>
+                <div className="text-center text-[min(7vw,3.6vh)] leading-[1.05]">
+                  {climber.id === ME_ID ? t.proudMe : t.proud(climber.name)}
+                </div>
               </>
             )}
             <div className={`tabular leading-[0.9] ${climber ? 'text-[min(26vw,11vh)]' : 'text-[min(32vw,15vh)]'}`}>
@@ -150,7 +186,7 @@ export function TimerScreen(p: Props) {
         )}
       </section>
 
-      <Quickdraws total={config.rounds} clipped={config.rounds - view.roundsLeft} />
+      <Quickdraws total={config.rounds} clipped={clippedCount(view.phase, config.rounds, view.status)} />
 
       <footer className="pb-safe grid grid-cols-3 items-center pt-2">
         <div className="flex flex-col items-center">
@@ -158,7 +194,7 @@ export function TimerScreen(p: Props) {
           <span className="text-center text-[min(5.5vw,1.25rem)] leading-tight">{t.roundsLeft}</span>
         </div>
         <div className="flex flex-col items-center">
-          <button onClick={center.action} className="text-accent active:scale-95" aria-label={center.label}>
+          <button onClick={falling ? undefined : center.action} className="text-accent active:scale-95" aria-label={center.label}>
             {view.status === 'idle' || finished ? (
               <span className="flex h-[112px] w-[112px] items-center justify-center rounded-full bg-accent text-black">
                 <span className="flex h-[96px] w-[96px] items-center justify-center rounded-full border-2 border-black">

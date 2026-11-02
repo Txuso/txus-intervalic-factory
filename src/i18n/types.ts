@@ -34,6 +34,17 @@ export interface Dict {
   resetMessage: string
   resetConfirm: string
   proud: (name: string) => string
+  /** Mensaje al encadenar cuando el escalador del entreno es el propio usuario */
+  proudMe: string
+  lastClip: string
+  lastPitch: string
+  /** El propio usuario como escalador */
+  me: string
+  addPhoto: string
+  changePhoto: string
+  removePhoto: string
+  rockTitle: string
+  rocks: { limestone: string; granite: string; sandstone: string }
   aria: { library: string; history: string; edit: string; settings: string; reset: string; duplicate: string }
 
   editTitle: string

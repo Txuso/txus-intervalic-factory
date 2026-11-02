@@ -1,3 +1,5 @@
+import { getMyPhoto } from './myPhoto'
+
 export interface Climber {
   id: string
   name: string
@@ -25,6 +27,10 @@ export const CLIMBERS: Climber[] = [
   withPhoto({ id: 'patxi', name: 'Patxi Usobiaga', initials: 'PU', color: '#99ff4a' }),
 ]
 
+/** El propio usuario: su nombre ("Yo"…) e iniciales salen del idioma elegido */
+export const ME_ID = 'me'
+
 export function findClimber(id: string | undefined): Climber | undefined {
+  if (id === ME_ID) return { id: ME_ID, name: '', initials: '', color: '#ffff40', photo: getMyPhoto() ?? undefined }
   return id ? CLIMBERS.find((c) => c.id === id) : undefined
 }
