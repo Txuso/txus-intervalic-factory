@@ -117,7 +117,12 @@ export function TimerScreen(p: Props) {
             </div>
           </div>
         ) : (
-          <div className="tabular flex flex-1 items-center text-[min(53vw,28vh)] leading-[0.9]">
+          // Centrado en el hueco a la derecha del croquis (que ocupa ~56 px) y tan grande como quepa:
+          // "00:00" en Bebas mide ~1,8 veces su tamaño de letra
+          <div
+            className="tabular flex flex-1 items-center self-stretch justify-center pr-2 pl-[60px] leading-[0.9]"
+            style={{ fontSize: 'min(28vh, calc((100vw - 68px) / 1.82))' }}
+          >
             {formatTime(view.phaseLeft)}
           </div>
         )}
