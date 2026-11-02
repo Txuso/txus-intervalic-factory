@@ -100,4 +100,17 @@ export const es: Dict = {
   keepAwake: 'Mantener pantalla encendida',
   keepAwakeSub: 'Evita que el móvil se bloquee durante el entreno',
   language: 'Idioma',
+  install: {
+    title: 'Instala la app',
+    intro: 'Añádela a la pantalla de inicio: se abre a pantalla completa, como una app, y funciona sin conexión.',
+    steps: {
+      ios: ['Toca el botón Compartir (en iOS 26 está dentro del menú ⋯)', 'Elige «Añadir a pantalla de inicio» y pulsa «Añadir»'],
+      android: ['Abre el menú ⋮ del navegador', 'Elige «Instalar aplicación» o «Añadir a pantalla de inicio»'],
+    },
+    now: 'Instalar',
+    later: 'Ahora no',
+    gotIt: 'Entendido',
+    settingsRow: 'Instalar la app',
+    settingsSub: 'Cómo añadirla a la pantalla de inicio',
+  },
 }

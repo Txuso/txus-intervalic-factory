@@ -97,4 +97,17 @@ export const eu: Dict = {
   keepAwake: 'Pantaila piztuta mantendu',
   keepAwakeSub: 'Mugikorra entrenatzean blokea ez dadin',
   language: 'Hizkuntza',
+  install: {
+    title: 'Instalatu aplikazioa',
+    intro: 'Gehitu hasierako pantailara: aplikazio bat bezala irekiko da, pantaila osoan, eta konexiorik gabe ere badabil.',
+    steps: {
+      ios: ['Sakatu Partekatu botoia (iOS 26n ⋯ menuaren barruan dago)', 'Aukeratu «Gehitu hasierako pantailan» eta sakatu «Gehitu»'],
+      android: ['Ireki nabigatzailearen ⋮ menua', 'Aukeratu «Instalatu aplikazioa» edo «Gehitu hasierako pantailan»'],
+    },
+    now: 'Instalatu',
+    later: 'Orain ez',
+    gotIt: 'Ulertuta',
+    settingsRow: 'Instalatu aplikazioa',
+    settingsSub: 'Nola gehitu hasierako pantailara',
+  },
 }

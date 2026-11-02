@@ -1,11 +1,13 @@
-import { Volume2 } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { ChevronRight, Volume2 } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { testSound, vibrationSupport } from '../audio/audio'
 import { Brand } from '../components/Brand'
+import { InstallHint } from '../components/InstallHint'
 import { ScreenHeader } from '../components/ScreenHeader'
 import { Toggle } from '../components/Toggle'
 import { useT } from '../i18n'
 import { LANGS } from '../i18n/lang'
+import { shouldOfferInstall } from '../install'
 import { useStore } from '../storage/store'
 
 function Row({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
@@ -24,6 +26,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
   const { settings, updateSettings } = useStore()
   const t = useT()
   const audible = settings.beeps || settings.voice
+  const [installOpen, setInstallOpen] = useState(false)
 
   return (
     <div className="rock no-scrollbar h-full overflow-y-auto">
@@ -91,6 +94,15 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
       <Row title={t.keepAwake} subtitle={t.keepAwakeSub}>
         <Toggle checked={settings.keepAwake} onChange={(keepAwake) => updateSettings({ keepAwake })} />
       </Row>
+
+      {shouldOfferInstall() && (
+        <button onClick={() => setInstallOpen(true)} className="block w-full text-left active:bg-white/5">
+          <Row title={t.install.settingsRow} subtitle={t.install.settingsSub}>
+            <ChevronRight className="h-6 w-6 shrink-0 text-muted" />
+          </Row>
+        </button>
+      )}
+      <InstallHint open={installOpen} onClose={() => setInstallOpen(false)} />
 
       <p className="pb-safe px-4 pt-6 text-center text-lg text-muted">Txus Intervalic Factory · v{__APP_VERSION__}</p>
     </div>

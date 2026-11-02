@@ -97,4 +97,17 @@ export const en: Dict = {
   keepAwake: 'Keep screen on',
   keepAwakeSub: 'Stops your phone locking during a workout',
   language: 'Language',
+  install: {
+    title: 'Install the app',
+    intro: 'Add it to your home screen: it opens full screen, like an app, and works offline.',
+    steps: {
+      ios: ['Tap the Share button (on iOS 26 it is inside the ⋯ menu)', 'Choose “Add to Home Screen” and tap “Add”'],
+      android: ['Open the browser menu ⋮', 'Choose “Install app” or “Add to Home screen”'],
+    },
+    now: 'Install',
+    later: 'Not now',
+    gotIt: 'Got it',
+    settingsRow: 'Install the app',
+    settingsSub: 'How to add it to your home screen',
+  },
 }

@@ -5,14 +5,18 @@ import { defaultConfig } from './domain/defaults'
 import { randomGrade } from './domain/grades'
 import type { TimerConfig } from './domain/types'
 import { useTimerEngine } from './hooks/useTimerEngine'
+import { InstallHint } from './components/InstallHint'
 import { useWakeLock } from './hooks/useWakeLock'
 import { useT } from './i18n'
+import { shouldOfferInstall } from './install'
 import { EditorScreen } from './screens/EditorScreen'
 import { HistoryScreen } from './screens/HistoryScreen'
 import { LibraryScreen } from './screens/LibraryScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { TimerScreen } from './screens/TimerScreen'
 import { useStore } from './storage/store'
+
+const INSTALL_HINT_KEY = 'tif.installHint'
 
 type Screen =
   | { name: 'timer' }
@@ -35,6 +39,27 @@ export default function App() {
     document.documentElement.lang = settings.language
   }, [t.voiceLang, settings.language])
   useWakeLock(settings.keepAwake && active)
+
+  // Primera visita desde el navegador del móvil: explica cómo instalarla (tras la pantalla de carga)
+  const [installOpen, setInstallOpen] = useState(false)
+  useEffect(() => {
+    if (!shouldOfferInstall()) return
+    try {
+      if (localStorage.getItem(INSTALL_HINT_KEY)) return
+    } catch {
+      // Sin almacenamiento: se muestra igualmente
+    }
+    const id = setTimeout(() => setInstallOpen(true), 1400)
+    return () => clearTimeout(id)
+  }, [])
+  const closeInstall = () => {
+    setInstallOpen(false)
+    try {
+      localStorage.setItem(INSTALL_HINT_KEY, '1')
+    } catch {
+      // Sin almacenamiento: volverá a salir la próxima vez
+    }
+  }
 
   const toTimer = () => setScreen({ name: 'timer' })
   const select = (c: TimerConfig) => {
@@ -96,6 +121,7 @@ export default function App() {
     <>
       {content}
       <Splash />
+      <InstallHint open={installOpen} onClose={closeInstall} />
     </>
   )
 }

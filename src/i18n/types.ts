@@ -92,4 +92,15 @@ export interface Dict {
   keepAwake: string
   keepAwakeSub: string
   language: string
+
+  install: {
+    title: string
+    intro: string
+    steps: { ios: string[]; android: string[] }
+    now: string
+    later: string
+    gotIt: string
+    settingsRow: string
+    settingsSub: string
+  }
 }

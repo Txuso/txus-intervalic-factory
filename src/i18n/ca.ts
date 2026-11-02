@@ -97,4 +97,17 @@ export const ca: Dict = {
   keepAwake: 'Mantenir la pantalla encesa',
   keepAwakeSub: "Evita que el mòbil es bloquegi durant l'entrenament",
   language: 'Idioma',
+  install: {
+    title: "Instal·la l'app",
+    intro: "Afegeix-la a la pantalla d'inici: s'obre a pantalla completa, com una app, i funciona sense connexió.",
+    steps: {
+      ios: ['Toca el botó Comparteix (a iOS 26 és dins del menú ⋯)', "Tria «Afegeix a la pantalla d'inici» i prem «Afegeix»"],
+      android: ['Obre el menú ⋮ del navegador', "Tria «Instal·la l'aplicació» o «Afegeix a la pantalla d'inici»"],
+    },
+    now: 'Instal·lar',
+    later: 'Ara no',
+    gotIt: 'Entesos',
+    settingsRow: "Instal·lar l'app",
+    settingsSub: "Com afegir-la a la pantalla d'inici",
+  },
 }
