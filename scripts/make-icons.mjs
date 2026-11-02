@@ -1,10 +1,11 @@
-// Genera los iconos de la PWA: mitad izquierda cronómetro (blanco con detalles en rojo),
-// mitad derecha el logo de Txus Climb Factory (assets/logo-source.png).
+// Genera los iconos de la PWA sobre fondo blanco: mitad izquierda cronómetro (blanco con
+// borde negro y detalles en rojo), mitad derecha el logo de Txus Climb Factory (assets/logo-source.png).
 // Dentro de la app se sigue usando el logo original (public/logo-512.png).
 import sharp from 'sharp'
 
 const SRC = 'assets/logo-source.png'
-const BG = '#1A1A1A'
+const BG = '#FFFFFF'
+const BLACK = '#111111'
 const WHITE = '#FFFFFF'
 const RED = '#C8455A' // el rojo del cielo del logo
 const S = 1024
@@ -23,10 +24,12 @@ function stopwatchSvg() {
   }
   const ha = (-50 / 360) * Math.PI * 2
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}">
-    <rect x="${CX - 60}" y="86" width="120" height="66" rx="20" fill="${RED}"/>
-    <rect x="${CX - 22}" y="140" width="44" height="60" fill="${WHITE}"/>
-    <rect x="${CX + 230}" y="168" width="66" height="42" rx="14" fill="${WHITE}" transform="rotate(45 ${CX + 263} 189)"/>
-    <circle cx="${CX}" cy="${CY}" r="${r}" fill="#111111" stroke="${WHITE}" stroke-width="42"/>
+    <rect x="${CX - 60}" y="86" width="120" height="66" rx="20" fill="${RED}" stroke="${BLACK}" stroke-width="10"/>
+    <rect x="${CX - 22}" y="140" width="44" height="60" fill="${WHITE}" stroke="${BLACK}" stroke-width="10"/>
+    <rect x="${CX + 230}" y="168" width="66" height="42" rx="14" fill="${WHITE}" stroke="${BLACK}" stroke-width="10" transform="rotate(45 ${CX + 263} 189)"/>
+    <circle cx="${CX}" cy="${CY}" r="${r + 26}" fill="${BLACK}"/>
+    <circle cx="${CX}" cy="${CY}" r="${r}" fill="${BLACK}" stroke="${WHITE}" stroke-width="42"/>
+    <circle cx="${CX}" cy="${CY}" r="${r - 26}" fill="none" stroke="${BLACK}" stroke-width="10"/>
     ${ticks}
     <line x1="${CX}" y1="${CY}" x2="${CX + Math.sin(ha) * (r - 105)}" y2="${CY - Math.cos(ha) * (r - 105)}" stroke="${RED}" stroke-width="26" stroke-linecap="round"/>
     <circle cx="${CX}" cy="${CY}" r="34" fill="${RED}"/>

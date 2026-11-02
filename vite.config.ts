@@ -15,7 +15,7 @@ export default defineConfig({
       includeAssets: ['apple-touch-icon.png', 'logo-512.png'],
       manifest: {
         name: 'Txus Intervalic Factory',
-        short_name: 'Txus Interval',
+        short_name: 'TIF',
         description: 'Temporizador Tabata para entrenar',
         lang: 'es',
         display: 'standalone',
