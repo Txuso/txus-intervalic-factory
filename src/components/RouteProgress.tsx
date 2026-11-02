@@ -37,19 +37,19 @@ export function RouteProgress({ progress, bolts, climberId, fallTo }: Props) {
           />
         )
       })}
-      {/* Escalador: monigote con los brazos arriba y su cara (34 px) como cabeza.
+      {/* Escalador: monigote con los brazos arriba y su cara (24 px) como cabeza.
           Puede pasar por encima del primer dígito de la cuenta atrás */}
       <div
-        className={`absolute left-[-15px] z-10 h-[52px] w-[48px] transition-[bottom] ${
+        className={`absolute left-[-9px] z-10 h-[40px] w-[36px] transition-[bottom] ${
           falling ? 'animate-rope-bounce duration-[450ms] ease-[cubic-bezier(0.55,0,1,0.45)]' : 'duration-300 ease-linear'
         } motion-reduce:transition-none`}
-        style={{ bottom: `calc(${p * 100}% - 20px)` }}
+        style={{ bottom: `calc(${p * 100}% - 17px)` }}
       >
-        <svg width="48" height="52" viewBox="0 0 48 52" className="absolute inset-0">
+        <svg width="36" height="40" viewBox="0 0 36 40" className="absolute inset-0">
           <path
-            d="M24 32v10M24 33 7 21 4 9M24 33l17-12 3-12M24 42l-6 5v4M24 42l6 4 1 5"
+            d="M18 23v8M18 24 5 15 3 7M18 24l13-9 2-8M18 31l-4 4v4M18 31l4 3 1 5"
             stroke="#000"
-            strokeWidth="2.6"
+            strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
@@ -58,10 +58,10 @@ export function RouteProgress({ progress, bolts, climberId, fallTo }: Props) {
         <span className="absolute inset-x-0 top-0 flex justify-center">
           {findClimber(climberId) ? (
             <span className="flex rounded-full ring-2 ring-black">
-              <ClimberAvatar climberId={climberId} size={34} />
+              <ClimberAvatar climberId={climberId} size={24} />
             </span>
           ) : (
-            <span className="text-[31px] leading-none">😣</span>
+            <span className="text-[22px] leading-none">😣</span>
           )}
         </span>
       </div>
