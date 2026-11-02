@@ -43,7 +43,7 @@ export const ca: Dict = {
   changePhoto: 'Canviar la meva foto',
   removePhoto: 'Treure la meva foto',
   rockTitle: 'Roca',
-  rocks: { limestone: 'Calcària', granite: 'Granit', sandstone: 'Gres' },
+  rocks: { limestone: 'Calcari', granite: 'Granit', sandstone: 'Arenisca' },
   aria: { library: 'Els meus entrenaments', history: 'Historial', edit: 'Editar', settings: 'Configuració', reset: 'Reiniciar', duplicate: 'Duplicar' },
 
   editTitle: 'Editar',
