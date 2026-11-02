@@ -81,7 +81,7 @@ export const ca: Dict = {
 
   settings: 'Configuració',
   alerts: 'Avisos',
-  beeps: 'Pitets',
+  beeps: 'So',
   beepsSub: 'Compte enrere 3-2-1 i canvi de fase',
   voiceTitle: 'Veu',
   voiceSub: 'Anuncia cada fase: «Apreta!», «Reposa»…',
