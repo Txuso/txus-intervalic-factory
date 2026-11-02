@@ -1,5 +1,5 @@
 // Genera los iconos de la PWA sobre fondo blanco: mitad izquierda cronómetro (blanco con
-// borde negro y detalles en rojo), mitad derecha el logo de Txus Climb Factory (assets/logo-source.png).
+// borde negro, esfera blanca y detalles en rojo), mitad derecha el logo de Txus Climb Factory (assets/logo-source.png).
 // Dentro de la app se sigue usando el logo original (public/logo-512.png).
 import sharp from 'sharp'
 
@@ -20,7 +20,7 @@ function stopwatchSvg() {
     const big = i % 5 === 0
     const r1 = r - 34
     const r2 = r - (big ? 92 : 60)
-    ticks += `<line x1="${CX + Math.sin(a) * r1}" y1="${CY - Math.cos(a) * r1}" x2="${CX + Math.sin(a) * r2}" y2="${CY - Math.cos(a) * r2}" stroke="${big ? RED : WHITE}" stroke-width="${big ? 16 : 7}" stroke-linecap="round"/>`
+    ticks += `<line x1="${CX + Math.sin(a) * r1}" y1="${CY - Math.cos(a) * r1}" x2="${CX + Math.sin(a) * r2}" y2="${CY - Math.cos(a) * r2}" stroke="${big ? RED : BLACK}" stroke-width="${big ? 16 : 7}" stroke-linecap="round"/>`
   }
   const ha = (-50 / 360) * Math.PI * 2
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}">
@@ -28,7 +28,7 @@ function stopwatchSvg() {
     <rect x="${CX - 22}" y="140" width="44" height="60" fill="${WHITE}" stroke="${BLACK}" stroke-width="10"/>
     <rect x="${CX + 230}" y="168" width="66" height="42" rx="14" fill="${WHITE}" stroke="${BLACK}" stroke-width="10" transform="rotate(45 ${CX + 263} 189)"/>
     <circle cx="${CX}" cy="${CY}" r="${r + 26}" fill="${BLACK}"/>
-    <circle cx="${CX}" cy="${CY}" r="${r}" fill="${BLACK}" stroke="${WHITE}" stroke-width="42"/>
+    <circle cx="${CX}" cy="${CY}" r="${r}" fill="${WHITE}" stroke="${WHITE}" stroke-width="42"/>
     <circle cx="${CX}" cy="${CY}" r="${r - 26}" fill="none" stroke="${BLACK}" stroke-width="10"/>
     ${ticks}
     <line x1="${CX}" y1="${CY}" x2="${CX + Math.sin(ha) * (r - 105)}" y2="${CY - Math.cos(ha) * (r - 105)}" stroke="${RED}" stroke-width="26" stroke-linecap="round"/>
