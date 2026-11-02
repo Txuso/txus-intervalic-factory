@@ -10,6 +10,8 @@ import { formatTime } from '../domain/format'
 import { randomGrade } from '../domain/grades'
 import { totalDuration } from '../domain/sequence'
 import type { TimerConfig } from '../domain/types'
+import { useT } from '../i18n'
+import type { Dict } from '../i18n/types'
 
 type TimeKey = 'prepare' | 'work' | 'rest' | 'cycleRest' | 'cooldown'
 type CountKey = 'rounds' | 'cycles'
@@ -21,15 +23,16 @@ const SIXTY = Array.from({ length: 60 }, (_, i) => i)
 const COUNTS = Array.from({ length: 99 }, (_, i) => i + 1)
 const pad = (n: number) => String(n).padStart(2, '0')
 
-function fields(c: TimerConfig): Field[] {
+function fields(c: TimerConfig, t: Dict): Field[] {
+  const f = t.fields
   return [
-    { key: 'prepare', kind: 'time', title: 'Magnesio', subtitle: 'Cuenta atrás antes de empezar', icon: <ChalkBag color="var(--color-prepare)" />, min: 0 },
-    { key: 'work', kind: 'time', title: 'Apreta', subtitle: 'Tiempo de esfuerzo de cada chapa', icon: <Jug color="var(--color-work)" />, min: 1 },
-    { key: 'rest', kind: 'time', title: 'Reposa', subtitle: 'Descanso entre chapas', icon: <Sloper color="var(--color-rest)" />, min: 0 },
-    { key: 'rounds', kind: 'count', title: 'Chapas', subtitle: 'Una chapa es apretar + reposar', icon: <span className="flex w-[30px] justify-center"><Quickdraw color="var(--color-rounds)" size={30} /></span>, min: 1 },
-    { key: 'cycles', kind: 'count', title: 'Largos', subtitle: `Un largo son ${c.rounds} chapas`, icon: <Pinch color="var(--color-cycles)" />, min: 1 },
-    { key: 'cycleRest', kind: 'time', title: 'Reunión', subtitle: 'Descanso entre largos', icon: <Crimp color="var(--color-cycles)" />, min: 0 },
-    { key: 'cooldown', kind: 'time', title: 'Ir al bar', subtitle: 'Vuelta a la calma al terminar', icon: <Pocket color="var(--color-cooldown)" />, min: 0 },
+    { key: 'prepare', kind: 'time', title: f.prepare.title, subtitle: f.prepare.sub, icon: <ChalkBag color="var(--color-prepare)" />, min: 0 },
+    { key: 'work', kind: 'time', title: f.work.title, subtitle: f.work.sub, icon: <Jug color="var(--color-work)" />, min: 1 },
+    { key: 'rest', kind: 'time', title: f.rest.title, subtitle: f.rest.sub, icon: <Sloper color="var(--color-rest)" />, min: 0 },
+    { key: 'rounds', kind: 'count', title: f.rounds.title, subtitle: f.rounds.sub, icon: <span className="flex w-[30px] justify-center"><Quickdraw color="var(--color-rounds)" size={30} /></span>, min: 1 },
+    { key: 'cycles', kind: 'count', title: f.cycles.title, subtitle: f.cycles.sub(c.rounds), icon: <Pinch color="var(--color-cycles)" />, min: 1 },
+    { key: 'cycleRest', kind: 'time', title: f.cycleRest.title, subtitle: f.cycleRest.sub, icon: <Crimp color="var(--color-cycles)" />, min: 0 },
+    { key: 'cooldown', kind: 'time', title: f.cooldown.title, subtitle: f.cooldown.sub, icon: <Pocket color="var(--color-cooldown)" />, min: 0 },
   ]
 }
 
@@ -41,6 +44,7 @@ interface Props {
 }
 
 export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
+  const t = useT()
   const [draft, setDraft] = useState(initial)
   const [editing, setEditing] = useState<Field | null>(null)
   const [temp, setTemp] = useState({ min: 0, sec: 0, count: 1 })
@@ -75,11 +79,11 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
       <header className="pt-safe bg-panel">
         <div className="flex items-center justify-between px-5 py-4 text-2xl">
           <button className="text-muted" onClick={onCancel}>
-            Cancelar
+            {t.cancel}
           </button>
-          <span className="text-3xl">{isNew ? 'Nuevo entreno' : 'Editar'}</span>
+          <span className="text-3xl">{isNew ? t.newTitle : t.editTitle}</span>
           <button className="text-work" onClick={() => save(false)}>
-            Guardar
+            {t.save}
           </button>
         </div>
       </header>
@@ -87,7 +91,7 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
       <div className="no-scrollbar flex-1 overflow-y-auto">
         <label className="block border-b border-line px-4 py-4">
           <span className={`text-lg ${nameError ? 'text-rest' : 'text-muted'}`}>
-            {nameError ? 'Ponle un nombre al entreno' : 'Nombre'}
+            {nameError ? t.nameRequired : t.name}
           </span>
           <input
             value={draft.name}
@@ -95,7 +99,7 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
               setNameError(false)
               setDraft((d) => ({ ...d, name: e.target.value }))
             }}
-            placeholder="Ej. Intervalic intensiu"
+            placeholder={t.namePlaceholder}
             className="block w-full bg-transparent text-4xl uppercase text-white outline-none placeholder:text-muted/50"
           />
         </label>
@@ -108,20 +112,20 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
               <UserRound className="h-[30px] w-[30px] shrink-0 rounded-full bg-btn p-1 text-muted" />
             )
           }
-          title="Escalador"
-          subtitle={climber ? climber.name : 'Elige una foto para este entreno'}
-          value={climber ? '' : <span className="text-3xl text-muted">Ninguno</span>}
+          title={t.climber}
+          subtitle={climber ? climber.name : t.climberPick}
+          value={climber ? '' : <span className="text-3xl text-muted">{t.climberNone}</span>}
           onClick={() => setPickingClimber(true)}
         />
         <ParamRow
           icon={<Dices className="h-[30px] w-[30px] shrink-0 text-accent" />}
-          title="Grado"
-          subtitle="Al azar · toca para volver a tirar"
+          title={t.grade}
+          subtitle={t.gradeSub}
           value={<span className="text-accent">{draft.grade}</span>}
           onClick={() => setDraft((d) => ({ ...d, grade: randomGrade() }))}
         />
 
-        {fields(draft).map((f) => (
+        {fields(draft, t).map((f) => (
           <ParamRow
             key={f.key}
             icon={f.icon}
@@ -133,20 +137,20 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
         ))}
 
         <div className="flex items-center justify-between px-4 py-5">
-          <span className="text-2xl text-muted">Duración total</span>
+          <span className="text-2xl text-muted">{t.total}</span>
           <span className="tabular text-4xl text-accent">{formatTime(totalDuration(draft))}</span>
         </div>
 
         {!isNew && (
           <div className="px-4 pb-8">
             <button onClick={() => save(true)} className="w-full rounded-xl bg-btn py-4 text-2xl active:opacity-70">
-              Guardar como nuevo
+              {t.saveAsNew}
             </button>
           </div>
         )}
       </div>
 
-      <BottomSheet open={pickingClimber} title="Escalador" confirmLabel="Listo" onCancel={() => setPickingClimber(false)} onConfirm={() => setPickingClimber(false)}>
+      <BottomSheet open={pickingClimber} title={t.climber} confirmLabel={t.done} onCancel={() => setPickingClimber(false)} onConfirm={() => setPickingClimber(false)}>
         <div className="grid grid-cols-3 gap-4 pb-2">
           {[...CLIMBERS, undefined].map((c) => {
             const selected = draft.climberId === c?.id
@@ -164,7 +168,7 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
                 ) : (
                   <span className={`flex h-[76px] w-[76px] items-center justify-center rounded-full bg-btn text-2xl text-muted ${selected ? 'ring-2 ring-accent' : ''}`}>—</span>
                 )}
-                <span className={`text-center text-lg leading-tight ${selected ? 'text-accent' : ''}`}>{c?.name ?? 'Ninguno'}</span>
+                <span className={`text-center text-lg leading-tight ${selected ? 'text-accent' : ''}`}>{c?.name ?? t.climberNone}</span>
               </button>
             )
           })}
@@ -174,14 +178,14 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
       <BottomSheet open={!!editing} title={editing?.title ?? ''} onCancel={() => setEditing(null)} onConfirm={accept}>
         {editing?.kind === 'time' && (
           <div className="flex items-center justify-center gap-2">
-            <WheelPicker values={SIXTY} value={temp.min} onChange={(min) => setTemp((t) => ({ ...t, min }))} format={pad} label="Min" />
+            <WheelPicker values={SIXTY} value={temp.min} onChange={(min) => setTemp((prev) => ({ ...prev, min }))} format={pad} label={t.min} />
             <span className="-mt-7 text-4xl">:</span>
-            <WheelPicker values={SIXTY} value={temp.sec} onChange={(sec) => setTemp((t) => ({ ...t, sec }))} format={pad} label="Seg" />
+            <WheelPicker values={SIXTY} value={temp.sec} onChange={(sec) => setTemp((prev) => ({ ...prev, sec }))} format={pad} label={t.sec} />
           </div>
         )}
         {editing?.kind === 'count' && (
           <div className="flex justify-center">
-            <WheelPicker values={COUNTS} value={temp.count} onChange={(count) => setTemp((t) => ({ ...t, count }))} />
+            <WheelPicker values={COUNTS} value={temp.count} onChange={(count) => setTemp((prev) => ({ ...prev, count }))} />
           </div>
         )}
       </BottomSheet>

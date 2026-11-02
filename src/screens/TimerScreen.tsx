@@ -1,13 +1,16 @@
 import { History, LayoutGrid, Pause, Pencil, Play, RotateCcw, Settings } from 'lucide-react'
 import { ChalkBurst } from '../components/ChalkBurst'
 import { ClimberAvatar } from '../components/ClimberAvatar'
+import { useConfirm } from '../components/ConfirmDialog'
 import { ProgressRing } from '../components/ProgressRing'
 import { Quickdraws } from '../components/Quickdraws'
 import { RouteProgress } from '../components/RouteProgress'
 import { formatTime } from '../domain/format'
-import { PHASE_COLOR, PHASE_LABEL } from '../domain/sequence'
+import { findClimber } from '../domain/climbers'
+import { PHASE_COLOR } from '../domain/sequence'
 import type { TimerConfig } from '../domain/types'
 import type { TimerView } from '../hooks/useTimerEngine'
+import { useT } from '../i18n'
 
 interface Props {
   config: TimerConfig
@@ -26,21 +29,24 @@ const iconBtn = 'flex h-11 w-10 items-center justify-center text-accent active:o
 
 export function TimerScreen(p: Props) {
   const { view, config } = p
+  const t = useT()
+  const confirm = useConfirm()
+  const climber = findClimber(config.climberId)
   const finished = view.status === 'finished'
   const active = view.status === 'running' || view.status === 'paused'
   const panelColor = finished ? 'var(--color-accent)' : view.phase ? PHASE_COLOR[view.phase.type] : 'var(--color-btn)'
 
-  const title = finished ? '¡Encadenado!' : view.phase ? PHASE_LABEL[view.phase.type] : ''
+  const title = finished ? t.finished : view.phase ? t.phase[view.phase.type] : ''
 
   const center = {
-    idle: { icon: <Play className="h-12 w-12 translate-x-0.5 fill-current" />, label: 'Empezar', action: p.onStart },
-    running: { icon: <Pause className="h-12 w-12 fill-current" />, label: 'Pausa', action: p.onPause },
-    paused: { icon: <Play className="h-12 w-12 translate-x-0.5 fill-current" />, label: 'Reanudar', action: p.onResume },
-    finished: { icon: <RotateCcw className="h-12 w-12" strokeWidth={2.5} />, label: 'Otra vez', action: p.onStart },
+    idle: { icon: <Play className="h-12 w-12 translate-x-0.5 fill-current" />, label: t.start, action: p.onStart },
+    running: { icon: <Pause className="h-12 w-12 fill-current" />, label: t.pause, action: p.onPause },
+    paused: { icon: <Play className="h-12 w-12 translate-x-0.5 fill-current" />, label: t.resume, action: p.onResume },
+    finished: { icon: <RotateCcw className="h-12 w-12" strokeWidth={2.5} />, label: t.again, action: p.onStart },
   }[view.status]
 
-  const reset = () => {
-    if (active && !confirm('¿Terminar el entreno? Se guardará en el historial como proyecto.')) return
+  const reset = async () => {
+    if (active && !(await confirm({ title: t.resetTitle, message: t.resetMessage, confirmLabel: t.resetConfirm, danger: true }))) return
     p.onReset()
   }
 
@@ -49,10 +55,10 @@ export function TimerScreen(p: Props) {
       <header className="pt-safe">
         <div className="flex items-center px-2 py-1">
           <div className="flex w-20">
-            <button className={iconBtn} onClick={p.onOpenLibrary} aria-label="Mis entrenos">
+            <button className={iconBtn} onClick={p.onOpenLibrary} aria-label={t.aria.library}>
               <LayoutGrid className="h-6 w-6" />
             </button>
-            <button className={iconBtn} onClick={p.onOpenHistory} aria-label="Historial">
+            <button className={iconBtn} onClick={p.onOpenHistory} aria-label={t.aria.history}>
               <History className="h-6 w-6" />
             </button>
           </div>
@@ -67,10 +73,10 @@ export function TimerScreen(p: Props) {
             </div>
           </div>
           <div className="flex w-20 justify-end">
-            <button className={iconBtn} onClick={p.onEdit} aria-label="Editar">
+            <button className={iconBtn} onClick={p.onEdit} aria-label={t.aria.edit}>
               <Pencil className="h-6 w-6" />
             </button>
-            <button className={iconBtn} onClick={p.onOpenSettings} aria-label="Ajustes">
+            <button className={iconBtn} onClick={p.onOpenSettings} aria-label={t.aria.settings}>
               <Settings className="h-6 w-6" />
             </button>
           </div>
@@ -84,7 +90,7 @@ export function TimerScreen(p: Props) {
         {(active || finished) && (
           <button
             onClick={reset}
-            aria-label="Reiniciar"
+            aria-label={t.aria.reset}
             className="absolute -top-5 right-4 z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-bg bg-[#2a2a2a] text-accent active:opacity-70"
           >
             <RotateCcw className="h-6 w-6" />
@@ -99,9 +105,16 @@ export function TimerScreen(p: Props) {
           {title}
         </div>
         {finished ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-[1vh]">
-            {config.climberId && <ClimberAvatar climberId={config.climberId} size={Math.round(Math.min(innerWidth * 0.36, innerHeight * 0.17))} ring />}
-            <div className="tabular text-[min(32vw,15vh)] leading-[0.9]">{formatTime(view.elapsed)}</div>
+          <div className="flex flex-1 flex-col items-center justify-center gap-[1vh] px-4">
+            {climber && (
+              <>
+                <ClimberAvatar climberId={climber.id} size={Math.round(Math.min(innerWidth * 0.32, innerHeight * 0.15))} ring />
+                <div className="text-center text-[min(7vw,3.6vh)] leading-[1.05]">{t.proud(climber.name)}</div>
+              </>
+            )}
+            <div className={`tabular leading-[0.9] ${climber ? 'text-[min(26vw,11vh)]' : 'text-[min(32vw,15vh)]'}`}>
+              {formatTime(view.elapsed)}
+            </div>
           </div>
         ) : (
           <div className="tabular flex flex-1 items-center text-[min(53vw,28vh)] leading-[0.9]">
@@ -116,17 +129,17 @@ export function TimerScreen(p: Props) {
       >
         {view.next ? (
           <>
-            <div className="text-[min(7vw,4vh)] leading-none">{PHASE_LABEL[view.next.type]}</div>
+            <div className="text-[min(7vw,4vh)] leading-none">{t.phase[view.next.type]}</div>
             <div className="tabular text-[min(20vw,11vh)] leading-[0.95]">{formatTime(view.next.duration)}</div>
           </>
         ) : (
           <div className="py-2 text-[min(9vw,5vh)] leading-none text-white">
             {finished ? (
               <>
-                Has encadenado un <span className="text-accent">{config.grade}</span>
+                {t.sentGrade.pre} <span className="text-accent">{config.grade}</span> {t.sentGrade.post}
               </>
             ) : (
-              'Última fase'
+              t.lastPhase
             )}
           </div>
         )}
@@ -137,7 +150,7 @@ export function TimerScreen(p: Props) {
       <footer className="pb-safe grid grid-cols-3 items-center pt-2">
         <div className="flex flex-col items-center">
           <span className="tabular text-[min(20vw,11vh)] leading-none text-rounds">{view.roundsLeft}</span>
-          <span className="text-center text-[min(5.5vw,1.25rem)] leading-tight">Chapas restantes</span>
+          <span className="text-center text-[min(5.5vw,1.25rem)] leading-tight">{t.roundsLeft}</span>
         </div>
         <div className="flex flex-col items-center">
           <button onClick={center.action} className="text-accent active:scale-95" aria-label={center.label}>
@@ -157,7 +170,7 @@ export function TimerScreen(p: Props) {
         </div>
         <div className="flex flex-col items-center">
           <span className="tabular text-[min(20vw,11vh)] leading-none text-cycles">{view.cyclesLeft}</span>
-          <span className="text-center text-[min(5.5vw,1.25rem)] leading-tight">Largos restantes</span>
+          <span className="text-center text-[min(5.5vw,1.25rem)] leading-tight">{t.cyclesLeft}</span>
         </div>
       </footer>
     </div>

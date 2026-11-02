@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { cueFinish, cuePhase, cueTick, unlockAudio } from '../audio/audio'
+import { cueFinish, cuePhase, cueTick, startKeepAlive, stopKeepAlive, unlockAudio } from '../audio/audio'
 import { newId } from '../domain/format'
-import { buildSequence, PHASE_VOICE, pickPhrase } from '../domain/sequence'
+import { buildSequence, pickPhrase } from '../domain/sequence'
 import type { HistoryEntry, Phase, PhaseType, Settings, TimerConfig } from '../domain/types'
+import type { Dict } from '../i18n/types'
 
 export type TimerStatus = 'idle' | 'running' | 'paused' | 'finished'
 
@@ -33,6 +34,7 @@ export function useTimerEngine(
   config: TimerConfig,
   settings: Settings,
   onRecord: (entry: HistoryEntry) => void,
+  t: Dict,
 ) {
   const seq = useMemo(() => buildSequence(config), [config])
   // suffix[i] = suma de duraciones desde la fase i hasta el final
@@ -57,11 +59,13 @@ export function useTimerEngine(
   const configRef = useRef(config)
   const onRecordRef = useRef(onRecord)
   const lastVoiceRef = useRef<Partial<Record<PhaseType, number>>>({})
+  const tRef = useRef(t)
   settingsRef.current = settings
+  tRef.current = t
   onRecordRef.current = onRecord
 
   const voiceFor = (type: PhaseType) => {
-    const list = PHASE_VOICE[type]
+    const list = tRef.current.voice[type]
     const i = pickPhrase(list.length, lastVoiceRef.current[type] ?? -1)
     lastVoiceRef.current[type] = i
     return list[i]
@@ -70,6 +74,9 @@ export function useTimerEngine(
   const go = (s: TimerStatus) => {
     statusRef.current = s
     setStatus(s)
+    // Mientras corre, un bucle de silencio mantiene viva la sesión de audio de iOS
+    if (s === 'running') startKeepAlive()
+    else stopKeepAlive()
   }
 
   const elapsedAt = useCallback((idx: number, leftMs: number) => {
@@ -137,7 +144,7 @@ export function useTimerEngine(
         indexRef.current = sq.length - 1
         setIndex(sq.length - 1)
         setRemainingMs(0)
-        cueFinish(settingsRef.current)
+        cueFinish(settingsRef.current, tRef.current.voiceFinish)
         record(true, sq.length - 1, 0)
         return
       }

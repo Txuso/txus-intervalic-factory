@@ -1,10 +1,13 @@
 import { Copy, Pencil, Timer, Trash2 } from 'lucide-react'
 import { Brand } from '../components/Brand'
 import { ClimberAvatar } from '../components/ClimberAvatar'
+import { useConfirm } from '../components/ConfirmDialog'
 import { ScreenHeader } from '../components/ScreenHeader'
 import { formatTime } from '../domain/format'
 import { totalDuration } from '../domain/sequence'
 import type { TimerConfig } from '../domain/types'
+import { useT } from '../i18n'
+import type { Dict } from '../i18n/types'
 import { useStore } from '../storage/store'
 
 interface Props {
@@ -15,21 +18,23 @@ interface Props {
   onNew: () => void
 }
 
-export function summary(c: TimerConfig) {
-  const cycles = c.cycles > 1 ? ` · ${c.cycles} largos` : ''
+export function summary(c: TimerConfig, t: Dict) {
+  const cycles = c.cycles > 1 ? ` · ${t.cyclesSummary(c.cycles)}` : ''
   return `${c.rounds}× ${formatTime(c.work)} / ${formatTime(c.rest)}${cycles}`
 }
 
 export function LibraryScreen({ onBack, onSelect, onEdit, onDuplicate, onNew }: Props) {
   const { configs, current, deleteConfig } = useStore()
+  const t = useT()
+  const confirm = useConfirm()
 
-  const remove = (c: TimerConfig) => {
-    if (confirm(`¿Borrar "${c.name}"?`)) deleteConfig(c.id)
+  const remove = async (c: TimerConfig) => {
+    if (await confirm({ title: t.deleteTitle(c.name), message: t.deleteMessage, confirmLabel: t.delete, danger: true })) deleteConfig(c.id)
   }
 
   return (
     <div className="rock no-scrollbar h-full overflow-y-auto">
-      <ScreenHeader title="Mis entrenos" onBack={onBack} />
+      <ScreenHeader title={t.myWorkouts} onBack={onBack} />
       <Brand size={110} />
 
       <ul>
@@ -51,18 +56,18 @@ export function LibraryScreen({ onBack, onSelect, onEdit, onDuplicate, onNew }: 
                   {c.name} <span className="text-white/60">{c.grade}</span>
                 </span>
                 <span className="mt-1 block text-base leading-none text-muted">
-                  {summary(c)} · <span className="text-accent">{formatTime(totalDuration(c))}</span>
+                  {summary(c, t)} · <span className="text-accent">{formatTime(totalDuration(c))}</span>
                 </span>
               </span>
             </button>
             <div className="flex pr-1 text-muted">
-              <button className="p-2 active:text-white" onClick={() => onEdit(c)} aria-label="Editar">
+              <button className="p-2 active:text-white" onClick={() => onEdit(c)} aria-label={t.aria.edit}>
                 <Pencil className="h-5 w-5" />
               </button>
-              <button className="p-2 active:text-white" onClick={() => onDuplicate(c)} aria-label="Duplicar">
+              <button className="p-2 active:text-white" onClick={() => onDuplicate(c)} aria-label={t.aria.duplicate}>
                 <Copy className="h-5 w-5" />
               </button>
-              <button className="p-2 active:text-rest" onClick={() => remove(c)} aria-label="Borrar">
+              <button className="p-2 active:text-rest" onClick={() => remove(c)} aria-label={t.delete}>
                 <Trash2 className="h-5 w-5" />
               </button>
             </div>
@@ -73,7 +78,7 @@ export function LibraryScreen({ onBack, onSelect, onEdit, onDuplicate, onNew }: 
       <div className="pb-safe px-4 pt-5">
         <button onClick={onNew} className="flex w-full items-center justify-center gap-3 rounded-xl bg-btn py-5 text-2xl active:opacity-70">
           <Timer className="h-7 w-7" />
-          Añadir un nuevo temporizador
+          {t.addNew}
         </button>
       </div>
     </div>

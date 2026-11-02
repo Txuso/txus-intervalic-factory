@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useT } from '../i18n'
 import { BottomSheet } from './BottomSheet'
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function NamePrompt({ open, title, initial = '', onCancel, onConfirm }: Props) {
+  const t = useT()
   const [name, setName] = useState(initial)
   const input = useRef<HTMLInputElement>(null)
 
@@ -23,13 +25,13 @@ export function NamePrompt({ open, title, initial = '', onCancel, onConfirm }: P
   const confirm = () => name.trim() && onConfirm(name.trim())
 
   return (
-    <BottomSheet open={open} title={title} onCancel={onCancel} onConfirm={confirm} confirmLabel="Guardar">
+    <BottomSheet open={open} title={title} onCancel={onCancel} onConfirm={confirm} confirmLabel={t.save}>
       <input
         ref={input}
         value={name}
         onChange={(e) => setName(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && confirm()}
-        placeholder="Ej. Suspensiones densidad"
+        placeholder={t.namePlaceholder}
         className="w-full rounded-lg bg-bg px-4 py-3 text-3xl uppercase text-white outline-none placeholder:text-muted/60"
       />
     </BottomSheet>

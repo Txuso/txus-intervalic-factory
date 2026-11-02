@@ -1,4 +1,5 @@
 import { newId } from './format'
+import { detectLang } from '../i18n/lang'
 import { randomGrade } from './grades'
 import type { Settings, TimerConfig } from './types'
 
@@ -62,4 +63,5 @@ export const DEFAULT_SETTINGS: Settings = {
   vibration: true,
   volume: 0.8,
   keepAwake: true,
+  language: detectLang(),
 }

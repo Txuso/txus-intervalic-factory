@@ -9,8 +9,8 @@ export function formatTime(totalSeconds: number): string {
   return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`
 }
 
-export function formatDate(ts: number): string {
-  return new Date(ts).toLocaleString('es-ES', {
+export function formatDate(ts: number, locale = 'es-ES'): string {
+  return new Date(ts).toLocaleString(locale, {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',

@@ -1,3 +1,5 @@
+import type { Lang } from '../i18n/lang'
+
 export type PhaseType = 'prepare' | 'work' | 'rest' | 'cycleRest' | 'cooldown'
 
 /** Configuración de un timer Tabata. Todas las duraciones en segundos. */
@@ -49,4 +51,5 @@ export interface Settings {
   /** 0..1 */
   volume: number
   keepAwake: boolean
+  language: Lang
 }

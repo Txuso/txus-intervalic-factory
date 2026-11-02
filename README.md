@@ -6,7 +6,8 @@ Temporizador Tabata instalable como app (PWA) en iPhone y Android, con el estilo
 - Entrenos guardados con nombre ("Mis entrenos").
 - Historial de los últimos 10 entrenos (completados y parados), que se pueden repetir o guardar con nombre.
 - Avisos independientes: pitidos, voz y vibración, con control de volumen.
-- Funciona sin conexión. Los datos se guardan solo en el dispositivo (con exportar/importar en Ajustes).
+- Funciona sin conexión. Los datos se guardan solo en el dispositivo.
+- En castellano, euskera, catalán e inglés (selector en Ajustes). Textos en `src/i18n/`.
 
 ## Desarrollo
 

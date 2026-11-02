@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { setVolume } from './audio/audio'
+import { setVoiceLang, setVolume } from './audio/audio'
 import { newId } from './domain/format'
 import { defaultConfig } from './domain/defaults'
 import { randomGrade } from './domain/grades'
 import type { TimerConfig } from './domain/types'
 import { useTimerEngine } from './hooks/useTimerEngine'
 import { useWakeLock } from './hooks/useWakeLock'
+import { useT } from './i18n'
 import { EditorScreen } from './screens/EditorScreen'
 import { HistoryScreen } from './screens/HistoryScreen'
 import { LibraryScreen } from './screens/LibraryScreen'
@@ -23,11 +24,16 @@ type Screen =
 export default function App() {
   const store = useStore()
   const { current, settings } = store
+  const t = useT()
   const [screen, setScreen] = useState<Screen>({ name: 'timer' })
-  const timer = useTimerEngine(current, settings, store.addHistory)
+  const timer = useTimerEngine(current, settings, store.addHistory, t)
   const active = timer.view.status === 'running' || timer.view.status === 'paused'
 
   useEffect(() => setVolume(settings.volume), [settings.volume])
+  useEffect(() => {
+    setVoiceLang(t.voiceLang)
+    document.documentElement.lang = settings.language
+  }, [t.voiceLang, settings.language])
   useWakeLock(settings.keepAwake && active)
 
   const toTimer = () => setScreen({ name: 'timer' })
@@ -44,7 +50,7 @@ export default function App() {
           onBack={toTimer}
           onSelect={select}
           onEdit={(c) => setScreen({ name: 'editor', config: c, isNew: false, back: 'library' })}
-          onDuplicate={(c) => store.upsertConfig({ ...c, id: newId(), name: `${c.name} (copia)`, grade: randomGrade() })}
+          onDuplicate={(c) => store.upsertConfig({ ...c, id: newId(), name: `${c.name} (${t.copySuffix})`, grade: randomGrade() })}
           onNew={() => setScreen({ name: 'editor', config: { ...defaultConfig(), name: '' }, isNew: true, back: 'library' })}
         />
       )

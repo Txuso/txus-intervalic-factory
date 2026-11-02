@@ -121,3 +121,13 @@ input[type="range"].volume:disabled {
   background: repeating-linear-gradient(-55deg, #ffff40 0 3px, #c2452d 3px 5px, #ffff40 5px 8px, #1a1a1a 8px 9px);
   border-radius: 999px;
 }
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+.animate-pop {
+  animation: pop 0.16s ease-out;
+}

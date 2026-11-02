@@ -11,7 +11,6 @@ const KEYS = {
   presets: 'tif.presets',
 }
 export const HISTORY_MAX = 10
-const EXPORT_VERSION = 1
 
 function load<T>(key: string, fallback: T): T {
   try {
@@ -58,8 +57,6 @@ interface StoreValue {
   deleteHistory: (id: string) => void
   saveHistoryAsConfig: (entryId: string, name: string) => TimerConfig | undefined
   updateSettings: (patch: Partial<Settings>) => void
-  exportData: () => string
-  importData: (json: string) => void
 }
 
 const StoreContext = createContext<StoreValue | null>(null)
@@ -108,28 +105,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setSettings((s) => ({ ...s, ...patch }))
   }, [])
 
-  const exportData = useCallback(
-    () => JSON.stringify({ app: 'txus-intervalic-factory', version: EXPORT_VERSION, configs, history, settings }, null, 2),
-    [configs, history, settings],
-  )
-
-  const importData = useCallback((json: string) => {
-    const data = JSON.parse(json)
-    if (data?.app !== 'txus-intervalic-factory' || !Array.isArray(data.configs)) {
-      throw new Error('El archivo no es una copia de Txus Intervalic Factory')
-    }
-    setConfigs(data.configs.map(normalizeConfig))
-    setHistory(Array.isArray(data.history) ? data.history.slice(0, HISTORY_MAX) : [])
-    if (data.settings) setSettings({ ...DEFAULT_SETTINGS, ...data.settings })
-    if (data.configs[0]) setCurrent(normalizeConfig(data.configs[0]))
-  }, [])
-
   const value = useMemo<StoreValue>(
     () => ({
       configs, history, settings, current, setCurrent, upsertConfig, deleteConfig,
-      addHistory, deleteHistory, saveHistoryAsConfig, updateSettings, exportData, importData,
+      addHistory, deleteHistory, saveHistoryAsConfig, updateSettings,
     }),
-    [configs, history, settings, current, upsertConfig, deleteConfig, addHistory, deleteHistory, saveHistoryAsConfig, updateSettings, exportData, importData],
+    [configs, history, settings, current, upsertConfig, deleteConfig, addHistory, deleteHistory, saveHistoryAsConfig, updateSettings],
   )
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
