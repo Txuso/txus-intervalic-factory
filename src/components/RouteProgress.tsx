@@ -15,7 +15,7 @@ export function RouteProgress({ progress, bolts, climberId }: Props) {
   const n = Math.min(Math.max(bolts, 3), 16)
   const p = Math.min(1, Math.max(0, progress))
   return (
-    <div className="pointer-events-none absolute top-[12%] bottom-[6%] left-[18px] w-[18px]" aria-hidden>
+    <div className="pointer-events-none absolute top-[12%] bottom-[6%] left-[4px] w-[18px]" aria-hidden>
       {/* Reunión */}
       <svg className="absolute -top-[18px] left-0" width="18" height="16" viewBox="0 0 18 16">
         <circle cx="5" cy="4" r="2.4" fill="none" stroke="#000" strokeWidth="1.6" opacity=".55" />
@@ -35,16 +35,17 @@ export function RouteProgress({ progress, bolts, climberId }: Props) {
           />
         )
       })}
-      {/* Escalador: monigote con los brazos arriba y su cara (grande) como cabeza */}
+      {/* Escalador: monigote con los brazos arriba y su cara como cabeza. Estrecho (26 px)
+          para que la cuenta atrás pueda ir centrada sin taparlo */}
       <div
-        className="absolute left-[-19px] z-10 h-[54px] w-[56px] transition-[bottom] duration-300 ease-linear"
-        style={{ bottom: `calc(${p * 100}% - 22px)` }}
+        className="absolute left-[-4px] z-10 h-[36px] w-[26px] transition-[bottom] duration-300 ease-linear"
+        style={{ bottom: `calc(${p * 100}% - 15px)` }}
       >
-        <svg width="56" height="54" viewBox="0 0 56 54" className="absolute inset-0">
+        <svg width="26" height="36" viewBox="0 0 26 36" className="absolute inset-0">
           <path
-            d="M28 32v10M28 31 9 19l-1-10M28 31l19-12 1-10M28 42l-7 6v6M28 42l7 5 1 6"
+            d="M13 21v8M13 22 2 14 1 5M13 22l11-8 1-9M13 29l-4 4v3M13 29l4 3 1 4"
             stroke="#000"
-            strokeWidth="2.8"
+            strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
@@ -53,10 +54,10 @@ export function RouteProgress({ progress, bolts, climberId }: Props) {
         <span className="absolute inset-x-0 top-0 flex justify-center">
           {findClimber(climberId) ? (
             <span className="flex rounded-full ring-2 ring-black">
-              <ClimberAvatar climberId={climberId} size={34} />
+              <ClimberAvatar climberId={climberId} size={22} />
             </span>
           ) : (
-            <span className="text-[32px] leading-none">😣</span>
+            <span className="text-[20px] leading-none">😣</span>
           )}
         </span>
       </div>

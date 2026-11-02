@@ -117,13 +117,13 @@ export function TimerScreen(p: Props) {
             </div>
           </div>
         ) : (
-          // Centrado en el hueco a la derecha del croquis (que ocupa ~56 px) y tan grande como quepa:
-          // "00:00" en Bebas mide ~1,8 veces su tamaño de letra
-          <div
-            className="tabular flex flex-1 items-center self-stretch justify-center pr-2 pl-[60px] leading-[0.9]"
-            style={{ fontSize: 'min(28vh, calc((100vw - 68px) / 1.82))' }}
-          >
-            {formatTime(view.phaseLeft)}
+          // Tan grande como quepa en el hueco del panel (el escalador puede pasar por encima):
+          // el tamaño sale del ancho y alto de este contenedor. "00:00" en Bebas mide ~1,82 veces
+          // su tamaño de letra de ancho y los dígitos ~0,72 de alto
+          <div className="flex min-h-0 flex-1 items-center justify-center self-stretch [container-type:size]">
+            <span className="tabular leading-none" style={{ fontSize: 'calc(min((100cqw - 8px) / 1.82, 125cqh) - 6px)' }}>
+              {formatTime(view.phaseLeft)}
+            </span>
           </div>
         )}
       </section>
