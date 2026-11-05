@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
@@ -17,6 +18,8 @@ createRoot(document.getElementById('root')!).render(
     <StoreProvider>
       <ConfirmProvider>
         <App />
+        {/* Estadísticas anónimas de visitas (Vercel Web Analytics, sin cookies) */}
+        <Analytics />
       </ConfirmProvider>
     </StoreProvider>
   </StrictMode>,
