@@ -13,7 +13,7 @@ let volume = 0.8
 let voiceLang = 'es-ES'
 let voice: SpeechSynthesisVoice | null = null
 
-export const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 
 export const vibrationSupport: 'native' | 'ios-haptic' | 'none' =
   'vibrate' in navigator ? 'native' : isIOS ? 'ios-haptic' : 'none'
@@ -44,13 +44,10 @@ const listeners = new Set<() => void>()
 const notify = () => listeners.forEach((l) => l())
 
 function applySession() {
-  // En iOS una web no puede sonar en modo silencio y a la vez dejar sonar la música de otras apps:
-  // 'playback' ignora el silencio pero pausa Spotify, y WebKit nunca activa "mezclar con otras apps".
-  // Se prioriza la música: con 'auto', una página que solo usa Web Audio queda en la categoría
-  // ambiente de iOS, que se mezcla con Spotify y que el modo silencio apaga (se avisa en Ajustes).
-  // No se fuerza 'ambient': en iOS 18, forzarlo con audioSession dejaba la página sin sonido.
+  // Safari 17+: 'playback' suena aunque el iPhone esté en silencio, pero pausa la música de otras
+  // apps. Con 'ambient' (que sí se mezcla con Spotify) los pitidos no sonaban en iPhone aunque la voz sí.
   const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession
-  if (session) session.type = 'auto'
+  if (session) session.type = 'playback'
 }
 
 function createContext() {

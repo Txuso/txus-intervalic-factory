@@ -107,7 +107,6 @@ export const ca: Dict = {
     none: 'No disponible en aquest dispositiu',
   },
   volume: 'Volum',
-  silentNote: 'Amb l\'iPhone en mode silenci no sonen els pitets. Si vols escoltar música mentre entrenes, treu el mode silenci.',
   test: 'Provar',
   screen: 'Pantalla',
   keepAwake: 'Mantenir la pantalla encesa',

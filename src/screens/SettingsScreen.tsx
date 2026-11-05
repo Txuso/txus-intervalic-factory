@@ -1,6 +1,6 @@
 import { ChevronRight, Volume2 } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
-import { isIOS, testSound, vibrationSupport } from '../audio/audio'
+import { testSound, vibrationSupport } from '../audio/audio'
 import { Brand } from '../components/Brand'
 import { InstallHint } from '../components/InstallHint'
 import { ScreenHeader } from '../components/ScreenHeader'
@@ -107,7 +107,6 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
             {t.test}
           </button>
         </div>
-        {isIOS && <p className="mt-3 text-base leading-snug text-muted">{t.silentNote}</p>}
       </div>
 
       <h2 className="px-4 pt-6 pb-1 text-xl text-muted">{t.screen}</h2>

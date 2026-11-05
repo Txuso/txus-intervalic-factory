@@ -107,7 +107,6 @@ export const eu: Dict = {
     none: 'Ez dago erabilgarri gailu honetan',
   },
   volume: 'Bolumena',
-  silentNote: 'iPhonea isilean badago, ez dira bip-ak entzuten. Entrenatzen duzun bitartean musika entzun nahi baduzu, kendu isilean modua.',
   test: 'Probatu',
   screen: 'Pantaila',
   keepAwake: 'Pantaila piztuta mantendu',

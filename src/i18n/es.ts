@@ -110,7 +110,6 @@ export const es: Dict = {
     none: 'No disponible en este dispositivo',
   },
   volume: 'Volumen',
-  silentNote: 'Con el iPhone en modo silencio no suenan los pitidos. Si quieres escuchar música mientras entrenas, quita el modo silencio.',
   test: 'Probar',
   screen: 'Pantalla',
   keepAwake: 'Mantener pantalla encendida',

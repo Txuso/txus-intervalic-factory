@@ -104,8 +104,6 @@ export interface Dict {
   vibration: string
   vibrationNote: { native: string; 'ios-haptic': string; none: string }
   volume: string
-  /** iPhone: el modo silencio apaga los pitidos */
-  silentNote: string
   test: string
   screen: string
   keepAwake: string
