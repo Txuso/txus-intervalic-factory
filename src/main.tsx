@@ -1,5 +1,5 @@
 import { Analytics } from '@vercel/analytics/react'
-import { lazy, StrictMode, Suspense } from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
 import App from './App'
@@ -13,21 +13,11 @@ registerSW({ immediate: true })
 initViewport()
 initRipple()
 
-// Página oculta de diagnóstico del audio en iPhone: /?audiotest
-const AudioTestScreen = lazy(() => import('./screens/AudioTestScreen').then((m) => ({ default: m.AudioTestScreen })))
-const audioTest = new URLSearchParams(location.search).has('audiotest')
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <StoreProvider>
       <ConfirmProvider>
-        {audioTest ? (
-          <Suspense>
-            <AudioTestScreen />
-          </Suspense>
-        ) : (
-          <App />
-        )}
+        <App />
         {/* Estadísticas anónimas de visitas (Vercel Web Analytics, sin cookies) */}
         <Analytics />
       </ConfirmProvider>

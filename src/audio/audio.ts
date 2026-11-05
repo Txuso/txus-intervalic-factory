@@ -45,8 +45,7 @@ const notify = () => listeners.forEach((l) => l())
 
 function applySession() {
   // Safari 17+: 'playback' suena aunque el iPhone esté en silencio, pero pausa la música de otras
-  // apps. Con 'ambient' (que sí se mezcla con Spotify) los pitidos no sonaban en iPhone aunque la
-  // voz sí: hasta encontrar un modo que mezcle y suene (ver ?audiotest) se queda 'playback'.
+  // apps. Con 'ambient' (que sí se mezcla con Spotify) los pitidos no sonaban en iPhone aunque la voz sí.
   const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession
   if (session) session.type = 'playback'
 }
