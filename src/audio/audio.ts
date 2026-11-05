@@ -1,13 +1,20 @@
+import { useSyncExternalStore } from 'react'
 import type { Settings } from '../domain/types'
 
 let ctx: AudioContext | null = null
+let createdAt = 0
 let master: GainNode | null = null
 let keepAlive: AudioBufferSourceNode | null = null
+/** Hay un entreno en marcha: el audio tiene que estar vivo */
+let active = false
+let mixMusic = true
+/** Cambió el tipo de sesión con el contexto ya creado: se rehace en el próximo toque */
+let stale = false
 let volume = 0.8
 let voiceLang = 'es-ES'
 let voice: SpeechSynthesisVoice | null = null
 
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+export const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 
 export const vibrationSupport: 'native' | 'ios-haptic' | 'none' =
   'vibrate' in navigator ? 'native' : isIOS ? 'ios-haptic' : 'none'
@@ -34,28 +41,68 @@ export function setVoiceLang(lang: string) {
   pickVoice()
 }
 
+const listeners = new Set<() => void>()
+const notify = () => listeners.forEach((l) => l())
+
+function applySession() {
+  // Safari 17+: 'ambient' se mezcla con la música de otras apps (Spotify) pero respeta el modo
+  // silencio; 'playback' suena aunque el iPhone esté en silencio, pero pausa la música
+  const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession
+  if (session) session.type = mixMusic ? 'ambient' : 'playback'
+}
+
+/** Escuchar música de otras apps mientras corre el entreno (solo afecta a iOS) */
+export function setMixMusic(on: boolean) {
+  if (on === mixMusic) return
+  mixMusic = on
+  applySession()
+  if (ctx) stale = true
+}
+
+function createContext() {
+  const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+  const c = new Ctor()
+  ctx = c
+  createdAt = performance.now()
+  stale = false
+  master = c.createGain()
+  master.connect(c.destination)
+  applyVolume()
+  // iOS suspende o "interrumpe" el contexto cuando entra otra app de audio o la app pasa a segundo
+  // plano: se intenta reanudar; si iOS no lo deja sin un toque, se avisa en pantalla (useAudioBlocked)
+  c.onstatechange = () => {
+    if (c !== ctx) return
+    if (active && c.state === 'suspended') void c.resume().catch(() => {})
+    notify()
+  }
+  // Recién creado puede tardar un instante en arrancar: el aviso solo cuenta pasado ese margen
+  setTimeout(notify, FRESH_MS + 100)
+}
+
+const FRESH_MS = 1000
+const isFresh = () => performance.now() - createdAt < FRESH_MS
+
 /**
  * Debe llamarse dentro de un gesto del usuario (toque en play): iOS solo permite
  * arrancar el audio y la voz así.
  */
 export function unlockAudio() {
-  // Safari 17+: 'playback' hace que suene aunque el iPhone esté en modo silencio
-  const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession
-  if (session) session.type = 'playback'
+  applySession()
 
-  if (!ctx) {
-    const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
-    ctx = new Ctor()
-    master = ctx.createGain()
-    master.connect(ctx.destination)
-    applyVolume()
-    // iOS suspende o "interrumpe" el contexto cuando habla la voz o entra otra app de audio:
-    // en cuanto pasa, se intenta reanudar mientras haya un entreno en marcha
-    ctx.onstatechange = () => {
-      if (keepAlive && ctx && ctx.state !== 'running' && ctx.state !== 'closed') void ctx.resume().catch(() => {})
-    }
+  // Un contexto que iOS ha dejado parado a veces no vuelve nunca con resume(), y solo se
+  // arreglaba reiniciando la app: dentro del toque se cambia por uno nuevo
+  if (ctx && (stale || (ctx.state !== 'running' && !isFresh()))) {
+    const old = ctx
+    const looping = !!keepAlive
+    stopLoop()
+    ctx = null
+    void old.close().catch(() => {})
+    createContext()
+    if (looping) startLoop()
   }
-  if (ctx.state !== 'running') void ctx.resume().catch(() => {})
+  if (!ctx) createContext()
+  if (ctx!.state !== 'running') void ctx!.resume().catch(() => {})
+  notify()
 
   if ('speechSynthesis' in window && !speechSynthesis.speaking && !speechSynthesis.pending) {
     const u = new SpeechSynthesisUtterance(' ')
@@ -69,7 +116,19 @@ export function unlockAudio() {
  * para que no se apague entre aviso y aviso.
  */
 export function startKeepAlive() {
-  if (!ctx || !master || keepAlive) return
+  active = true
+  startLoop()
+  notify()
+}
+
+export function stopKeepAlive() {
+  active = false
+  stopLoop()
+  notify()
+}
+
+function startLoop() {
+  if (!ctx || keepAlive) return
   const src = ctx.createBufferSource()
   src.buffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate)
   src.loop = true
@@ -78,7 +137,7 @@ export function startKeepAlive() {
   keepAlive = src
 }
 
-export function stopKeepAlive() {
+function stopLoop() {
   try {
     keepAlive?.stop()
   } catch {
@@ -103,12 +162,42 @@ function withRunningContext(play: (c: AudioContext, out: GainNode) => void) {
   if (!ctx || !master) return
   const c = ctx
   const out = master
-  if (c.state === 'running') play(c, out)
-  else
-    c.resume()
-      .then(() => play(c, out))
-      .catch(() => {})
+  if (c.state === 'running') {
+    play(c, out)
+    return
+  }
+  // Si iOS tarda en reanudarlo (o no lo hace nunca), el aviso se descarta: sonaría a destiempo
+  const askedAt = performance.now()
+  c.resume()
+    .then(() => {
+      if (c === ctx && performance.now() - askedAt < 500) play(c, out)
+    })
+    .catch(() => {})
 }
+
+/** Hay un entreno en marcha pero el audio está parado y hace falta un toque para reactivarlo */
+function isBlocked() {
+  return active && !!ctx && ctx.state !== 'running' && !isFresh()
+}
+
+function subscribe(cb: () => void) {
+  listeners.add(cb)
+  return () => listeners.delete(cb)
+}
+
+export function useAudioBlocked(): boolean {
+  return useSyncExternalStore(subscribe, isBlocked)
+}
+
+// Cualquier toque durante el entreno reactiva el audio si iOS lo ha parado, no solo pausa/play.
+// touchend es el evento que iOS acepta como gesto para el audio; click cubre el resto.
+for (const type of ['touchend', 'click'] as const) {
+  document.addEventListener(type, () => isBlocked() && unlockAudio(), { capture: true, passive: true })
+}
+// Al volver a primer plano iOS a veces deja reanudar sin toque, si ya acabó la interrupción
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && active && ctx && ctx.state !== 'running') void ctx.resume().catch(() => {})
+})
 
 function tone(freq: number, ms: number, delayMs = 0) {
   withRunningContext((c, out) => {
@@ -127,6 +216,10 @@ function tone(freq: number, ms: number, delayMs = 0) {
   })
 }
 
+// Referencia a la frase en curso: si el navegador la libera antes de acabar se pierde su fin
+// y la cola de voz se queda atascada (pasa en Safari y Chrome)
+let utterance: SpeechSynthesisUtterance | null = null
+
 function speak(text: string) {
   if (!('speechSynthesis' in window)) return
   const say = () => {
@@ -135,6 +228,15 @@ function speak(text: string) {
     if (voice) u.voice = voice
     u.volume = volume
     u.rate = 1.05
+    u.onend = () => {
+      if (utterance === u) utterance = null
+    }
+    u.onerror = (e) => {
+      if (utterance === u) utterance = null
+      // Un fallo de verdad (no un cancel nuestro) puede dejar la cola bloqueada: se vacía
+      if (e.error !== 'interrupted' && e.error !== 'canceled') speechSynthesis.cancel()
+    }
+    utterance = u
     // Safari a veces deja la cola en pausa y no vuelve a hablar
     speechSynthesis.resume()
     speechSynthesis.speak(u)

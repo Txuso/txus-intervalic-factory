@@ -99,6 +99,9 @@ export const eu: Dict = {
   beepsSub: '3-2-1 atzerako kontaketa eta fase-aldaketa',
   voiceTitle: 'Ahotsa',
   voiceSub: 'Fase bakoitza iragartzen du',
+  mixMusic: 'Musika aldi berean entzun',
+  mixMusicSub: 'Spotifyk jotzen jarraitzen du. iPhonea isilean badago, ez dira bip-ak entzungo',
+  audioBlocked: 'Ukitu soinua berriro aktibatzeko',
   vibration: 'Bibrazioa',
   vibrationNote: {
     native: 'Fasez aldatzean eta atzerako kontaketan bibratzen du',

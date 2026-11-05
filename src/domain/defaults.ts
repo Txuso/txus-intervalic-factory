@@ -63,6 +63,7 @@ export const DEFAULT_SETTINGS: Settings = {
   vibration: true,
   volume: 0.8,
   keepAwake: true,
+  mixMusic: true,
   language: detectLang(),
   rock: 'limestone',
 }

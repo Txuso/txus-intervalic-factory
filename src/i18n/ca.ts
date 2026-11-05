@@ -99,6 +99,9 @@ export const ca: Dict = {
   beepsSub: 'Compte enrere 3-2-1 i canvi de fase',
   voiceTitle: 'Veu',
   voiceSub: 'Anuncia cada fase: «Apreta!», «Reposa»…',
+  mixMusic: 'Escoltar música alhora',
+  mixMusicSub: "Spotify continua sonant. Amb l'iPhone en silenci no sonaran els pitets",
+  audioBlocked: 'Toca per reactivar el so',
   vibration: 'Vibració',
   vibrationNote: {
     native: 'Vibra en canviar de fase i al compte enrere',

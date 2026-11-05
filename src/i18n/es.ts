@@ -102,6 +102,9 @@ export const es: Dict = {
   beepsSub: 'Cuenta atrás 3-2-1 y cambio de fase',
   voiceTitle: 'Voz',
   voiceSub: 'Anuncia cada fase: «¡Apreta!», «Reposa»…',
+  mixMusic: 'Escuchar música a la vez',
+  mixMusicSub: 'Spotify sigue sonando. Con el iPhone en silencio no sonarán los pitidos',
+  audioBlocked: 'Toca para reactivar el sonido',
   vibration: 'Vibración',
   vibrationNote: {
     native: 'Vibra al cambiar de fase y en la cuenta atrás',

@@ -1,5 +1,6 @@
-import { History, LayoutGrid, Pause, Pencil, Play, RotateCcw, Settings } from 'lucide-react'
+import { History, LayoutGrid, Pause, Pencil, Play, RotateCcw, Settings, VolumeX } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { unlockAudio, useAudioBlocked } from '../audio/audio'
 import { ChalkBurst } from '../components/ChalkBurst'
 import { ClimberAvatar } from '../components/ClimberAvatar'
 import { useConfirm } from '../components/ConfirmDialog'
@@ -13,6 +14,7 @@ import { clippedCount, lastCall, PHASE_COLOR } from '../domain/sequence'
 import type { TimerConfig } from '../domain/types'
 import type { TimerView } from '../hooks/useTimerEngine'
 import { useT } from '../i18n'
+import { useStore } from '../storage/store'
 
 interface Props {
   config: TimerConfig
@@ -35,6 +37,8 @@ const iconBtn = 'flex h-11 w-10 items-center justify-center text-accent active:o
 export function TimerScreen(p: Props) {
   const { view, config } = p
   const t = useT()
+  const { settings } = useStore()
+  const audioBlocked = useAudioBlocked()
   const confirm = useConfirm()
   const climber = findClimber(config.climberId)
   const finished = view.status === 'finished'
@@ -126,6 +130,15 @@ export function TimerScreen(p: Props) {
             <RotateCcw className="h-6 w-6" />
           </button>
         )}
+        {audioBlocked && (settings.beeps || settings.voice) && (
+          <button
+            onClick={unlockAudio}
+            className="absolute top-2 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black px-4 py-1.5 text-xl whitespace-nowrap text-accent shadow-lg"
+          >
+            <VolumeX className="h-5 w-5" />
+            {t.audioBlocked}
+          </button>
+        )}
         {!finished && (
           <RouteProgress progress={view.totalProgress} bolts={series} climberId={config.climberId} fallTo={fallTo ?? undefined} />
         )}
@@ -195,7 +208,7 @@ export function TimerScreen(p: Props) {
           <span className="text-center text-[min(5.5vw,1.25rem)] leading-tight">{t.roundsLeft}</span>
         </div>
         <div className="flex flex-col items-center">
-          <button onClick={falling ? undefined : center.action} className="text-accent active:scale-95" aria-label={center.label}>
+          <button onClick={falling ? undefined : center.action} className="rounded-full text-accent active:scale-95" aria-label={center.label}>
             {view.status === 'idle' || finished ? (
               <span className="flex h-[112px] w-[112px] items-center justify-center rounded-full bg-accent text-black">
                 <span className="flex h-[96px] w-[96px] items-center justify-center rounded-full border-2 border-black">
