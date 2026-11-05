@@ -107,6 +107,7 @@ export const en: Dict = {
     none: 'Not available on this device',
   },
   volume: 'Volume',
+  silentNote: 'With the iPhone on silent the beeps won’t sound. If you want to listen to music while you train, turn silent mode off.',
   test: 'Test',
   screen: 'Screen',
   keepAwake: 'Keep screen on',
