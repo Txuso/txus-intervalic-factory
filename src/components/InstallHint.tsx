@@ -27,7 +27,7 @@ export function InstallHint({ open, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 px-4 pb-safe sm:items-center" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center animate-fade-in bg-black/70 px-4 pb-safe sm:items-center" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"

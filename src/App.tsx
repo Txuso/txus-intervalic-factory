@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { setVoiceLang, setVolume } from './audio/audio'
+import { setMixMusic, setVoiceLang, setVolume } from './audio/audio'
 import { newId } from './domain/format'
 import { defaultConfig } from './domain/defaults'
 import { randomGrade } from './domain/grades'
@@ -25,15 +25,22 @@ type Screen =
   | { name: 'settings' }
   | { name: 'editor'; config: TimerConfig; isNew: boolean; back: 'timer' | 'library' }
 
+// Posición horizontal de cada pantalla respecto al temporizador, según el lado de la cabecera
+// donde está su botón. La nueva entra por la derecha si está más a la derecha que la anterior.
+const SIDE: Record<Screen['name'], number> = { library: -1, history: -1, timer: 0, settings: 1, editor: 1 }
+
 export default function App() {
   const store = useStore()
   const { current, settings } = store
   const t = useT()
-  const [screen, setScreen] = useState<Screen>({ name: 'timer' })
+  const [nav, setNav] = useState<{ screen: Screen; fromLeft: boolean }>({ screen: { name: 'timer' }, fromLeft: false })
+  const screen = nav.screen
+  const setScreen = (next: Screen) => setNav((n) => ({ screen: next, fromLeft: SIDE[next.name] < SIDE[n.screen.name] }))
   const timer = useTimerEngine(current, settings, store.addHistory, t)
   const active = timer.view.status === 'running' || timer.view.status === 'paused'
 
   useEffect(() => setVolume(settings.volume), [settings.volume])
+  useEffect(() => setMixMusic(settings.mixMusic), [settings.mixMusic])
   useEffect(() => {
     setVoiceLang(t.voiceLang)
     document.documentElement.lang = settings.language
@@ -122,7 +129,9 @@ export default function App() {
 
   return (
     <>
-      {content}
+      <div key={screen.name} className={`h-full ${nav.fromLeft ? 'animate-screen-from-left' : 'animate-screen-from-right'}`}>
+        {content}
+      </div>
       <Splash />
       <InstallHint open={installOpen} onClose={closeInstall} />
     </>

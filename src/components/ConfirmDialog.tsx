@@ -17,10 +17,13 @@ const ConfirmContext = createContext<Confirm | null>(null)
 export function ConfirmProvider({ children }: { children: ReactNode }) {
   const t = useT()
   const [opts, setOpts] = useState<ConfirmOptions | null>(null)
+  // Ya respondido: se queda en pantalla hasta que acaba la animación de salida
+  const [closing, setClosing] = useState(false)
   const resolver = useRef<(ok: boolean) => void>(undefined)
 
   const confirm = useCallback<Confirm>((o) => {
     setOpts(o)
+    setClosing(false)
     return new Promise((resolve) => {
       resolver.current = resolve
     })
@@ -29,19 +32,28 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
   const close = (ok: boolean) => {
     resolver.current?.(ok)
     resolver.current = undefined
-    setOpts(null)
+    setClosing(true)
   }
 
   return (
     <ConfirmContext.Provider value={confirm}>
       {children}
       {opts && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6" onClick={() => close(false)}>
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 ${closing ? 'animate-fade-out pointer-events-none' : 'animate-fade-in'}`}
+          onClick={() => close(false)}
+          onAnimationEnd={(e) => {
+            if (closing && e.target === e.currentTarget) {
+              setOpts(null)
+              setClosing(false)
+            }
+          }}
+        >
           <div
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="confirm-title"
-            className="animate-pop w-full max-w-sm overflow-hidden rounded-2xl bg-panel shadow-2xl"
+            className={`${closing ? 'animate-pop-out' : 'animate-pop'} w-full max-w-sm overflow-hidden rounded-2xl bg-panel shadow-2xl`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="rope h-[5px]" />

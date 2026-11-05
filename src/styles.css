@@ -97,7 +97,77 @@ input[type="range"].volume:disabled {
   }
 }
 .animate-sheet {
-  animation: sheet-up 0.22s ease-out;
+  animation: sheet-up 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes sheet-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+.animate-sheet-out {
+  animation: sheet-down 0.2s ease-in forwards;
+}
+
+/* Fondo oscuro de hojas y diálogos */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+.animate-fade-out {
+  animation: fade-out 0.2s ease-in forwards;
+}
+
+/* Cambio de pantalla: entra por el lado donde está su botón en la cabecera (ver SIDE en App.tsx).
+   Sin "forwards": al acabar no queda transform, que rompería los position: fixed de dentro. */
+@keyframes screen-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(24%);
+  }
+}
+@keyframes screen-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24%);
+  }
+}
+.animate-screen-from-right {
+  animation: screen-from-right 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.animate-screen-from-left {
+  animation: screen-from-left 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Onda al pulsar un botón (ver ripple.ts) */
+.ripple-host {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+@keyframes ripple {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.3;
+  transform: scale(0);
+  animation: ripple 0.55s ease-out forwards;
 }
 
 @keyframes splash-out {
@@ -146,7 +216,16 @@ input[type="range"].volume:disabled {
   }
 }
 .animate-pop {
-  animation: pop 0.16s ease-out;
+  animation: pop 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes pop-out {
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+.animate-pop-out {
+  animation: pop-out 0.15s ease-in forwards;
 }
 
 /* Cinta recién chapada */
@@ -184,7 +263,18 @@ input[type="range"].volume:disabled {
 
 @media (prefers-reduced-motion: reduce) {
   .animate-clip,
-  .animate-rope-bounce {
+  .animate-rope-bounce,
+  .animate-screen-from-right,
+  .animate-screen-from-left {
     animation: none;
+  }
+  /* Las salidas se quedan, pero instantáneas: su animationend es lo que desmonta la hoja */
+  .animate-sheet,
+  .animate-sheet-out,
+  .animate-pop,
+  .animate-pop-out,
+  .animate-fade-in,
+  .animate-fade-out {
+    animation-duration: 1ms;
   }
 }
