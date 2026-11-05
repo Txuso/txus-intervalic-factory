@@ -55,6 +55,11 @@ export interface Dict {
   climber: string
   climberNone: string
   climberPick: string
+  addClimber: string
+  newClimber: string
+  editClimber: string
+  climberName: string
+  photo: string
   grade: string
   gradeSub: string
   total: string

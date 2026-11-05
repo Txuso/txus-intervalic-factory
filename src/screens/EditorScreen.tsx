@@ -1,11 +1,14 @@
-import { Camera, Dices, UserRound } from 'lucide-react'
+import { Camera, Dices, UserPlus, UserRound } from 'lucide-react'
 import { useRef, useState, type ReactNode } from 'react'
 import { BottomSheet } from '../components/BottomSheet'
 import { ClimberAvatar } from '../components/ClimberAvatar'
+import { ClimberForm } from '../components/ClimberForm'
+import { useConfirm } from '../components/ConfirmDialog'
 import { ChalkBag, Crimp, Jug, Pinch, Pocket, Quickdraw, Sloper } from '../components/Holds'
 import { ParamRow } from '../components/ParamRow'
 import { WheelPicker } from '../components/WheelPicker'
 import { CLIMBERS, findClimber, ME_ID } from '../domain/climbers'
+import { addCustomClimber, deleteCustomClimber, updateCustomClimber, useCustomClimbers } from '../domain/customClimbers'
 import { formatTime } from '../domain/format'
 import { randomGrade } from '../domain/grades'
 import { fileToAvatar, setMyPhoto, useMyPhoto } from '../domain/myPhoto'
@@ -54,6 +57,11 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
   const climber = findClimber(draft.climberId)
   const myPhoto = useMyPhoto()
   const photoInput = useRef<HTMLInputElement>(null)
+  const confirm = useConfirm()
+  const customs = useCustomClimbers()
+  const selectedCustom = customs.find((c) => c.id === draft.climberId)
+  // Formulario de escalador propio: 'new' para crear uno, o el que se está editando
+  const [climberForm, setClimberForm] = useState<'new' | { id: string; name: string; photo?: string } | null>(null)
 
   const pickClimber = (id: string | undefined) => {
     setDraft((d) => ({ ...d, climberId: id }))
@@ -69,6 +77,20 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
     } catch {
       // Formato que el navegador no sabe leer: se ignora
     }
+  }
+
+  const saveClimber = (name: string, photo?: string) => {
+    if (climberForm === 'new') pickClimber(addCustomClimber(name, photo))
+    else if (climberForm) updateCustomClimber(climberForm.id, { name, photo })
+    setClimberForm(null)
+  }
+
+  const removeClimber = async () => {
+    if (!selectedCustom) return
+    const ok = await confirm({ title: t.deleteTitle(selectedCustom.name), message: t.deleteMessage, confirmLabel: t.delete, danger: true })
+    if (!ok) return
+    deleteCustomClimber(selectedCustom.id)
+    setDraft((d) => ({ ...d, climberId: undefined }))
   }
 
   const open = (f: Field) => {
@@ -187,6 +209,21 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
                 {myPhoto ? t.me : t.addPhoto}
               </span>
             </button>
+            {customs.map((c) => {
+              const selected = draft.climberId === c.id
+              return (
+                <button key={c.id} onClick={() => pickClimber(c.id)} className="flex flex-col items-center gap-1 active:opacity-70">
+                  <ClimberAvatar climberId={c.id} size={64} ring={selected} />
+                  <span className={`text-center text-lg leading-tight break-words ${selected ? 'text-accent' : ''}`}>{c.name}</span>
+                </button>
+              )
+            })}
+            <button onClick={() => setClimberForm('new')} className="flex flex-col items-center gap-1 active:opacity-70">
+              <span className="flex h-[64px] w-[64px] items-center justify-center rounded-full border-2 border-dashed border-accent text-accent">
+                <UserPlus className="h-7 w-7" />
+              </span>
+              <span className="text-center text-lg leading-tight">{t.addClimber}</span>
+            </button>
             {[...CLIMBERS, undefined].map((c) => {
               const selected = draft.climberId === c?.id
               return (
@@ -205,7 +242,19 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
               )
             })}
           </div>
-          {myPhoto && (
+          {selectedCustom ? (
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setClimberForm({ id: selectedCustom.id, name: selectedCustom.name, photo: selectedCustom.photo })}
+                className="rounded-lg bg-btn py-3 text-xl text-accent active:opacity-70"
+              >
+                {t.editClimber}
+              </button>
+              <button onClick={() => void removeClimber()} className="rounded-lg bg-btn py-3 text-xl text-rest active:opacity-70">
+                {t.delete}
+              </button>
+            </div>
+          ) : myPhoto && (
             <div className="mt-3 grid grid-cols-2 gap-3">
               <button onClick={() => photoInput.current?.click()} className="rounded-lg bg-btn py-3 text-xl text-accent active:opacity-70">
                 {t.changePhoto}
@@ -233,6 +282,13 @@ export function EditorScreen({ initial, isNew, onCancel, onSave }: Props) {
           }}
         />
       </BottomSheet>
+
+      <ClimberForm
+        open={!!climberForm}
+        initial={climberForm === 'new' ? undefined : (climberForm ?? undefined)}
+        onCancel={() => setClimberForm(null)}
+        onConfirm={saveClimber}
+      />
 
       <BottomSheet open={!!editing} title={editing?.title ?? ''} onCancel={() => setEditing(null)} onConfirm={accept}>
         {editing?.kind === 'time' && (

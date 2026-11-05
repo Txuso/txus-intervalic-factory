@@ -1,3 +1,4 @@
+import { getCustomClimbers } from './customClimbers'
 import { getMyPhoto } from './myPhoto'
 
 export interface Climber {
@@ -32,5 +33,5 @@ export const ME_ID = 'me'
 
 export function findClimber(id: string | undefined): Climber | undefined {
   if (id === ME_ID) return { id: ME_ID, name: '', initials: '', color: '#ffff40', photo: getMyPhoto() ?? undefined }
-  return id ? CLIMBERS.find((c) => c.id === id) : undefined
+  return id ? (CLIMBERS.find((c) => c.id === id) ?? getCustomClimbers().find((c) => c.id === id)) : undefined
 }
