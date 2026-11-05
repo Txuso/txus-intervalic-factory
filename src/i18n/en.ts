@@ -99,8 +99,6 @@ export const en: Dict = {
   beepsSub: '3-2-1 countdown and phase change',
   voiceTitle: 'Voice',
   voiceSub: 'Announces each phase: “Crush it!”, “Rest”…',
-  mixMusic: 'Play music at the same time',
-  mixMusicSub: 'Spotify keeps playing. With the iPhone on silent the beeps won’t sound',
   audioBlocked: 'Tap to turn the sound back on',
   vibration: 'Vibration',
   vibrationNote: {

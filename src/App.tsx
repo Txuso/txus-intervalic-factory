@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { setMixMusic, setVoiceLang, setVolume } from './audio/audio'
+import { setVoiceLang, setVolume } from './audio/audio'
 import { newId } from './domain/format'
 import { defaultConfig } from './domain/defaults'
 import { randomGrade } from './domain/grades'
@@ -40,7 +40,6 @@ export default function App() {
   const active = timer.view.status === 'running' || timer.view.status === 'paused'
 
   useEffect(() => setVolume(settings.volume), [settings.volume])
-  useEffect(() => setMixMusic(settings.mixMusic), [settings.mixMusic])
   useEffect(() => {
     setVoiceLang(t.voiceLang)
     document.documentElement.lang = settings.language

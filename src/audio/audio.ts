@@ -7,14 +7,13 @@ let master: GainNode | null = null
 let keepAlive: AudioBufferSourceNode | null = null
 /** Hay un entreno en marcha: el audio tiene que estar vivo */
 let active = false
-let mixMusic = true
-/** Cambió el tipo de sesión con el contexto ya creado: se rehace en el próximo toque */
-let stale = false
+/** Desde cuándo está parado el contexto (0 = en marcha) */
+let stoppedSince = 0
 let volume = 0.8
 let voiceLang = 'es-ES'
 let voice: SpeechSynthesisVoice | null = null
 
-export const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 
 export const vibrationSupport: 'native' | 'ios-haptic' | 'none' =
   'vibrate' in navigator ? 'native' : isIOS ? 'ios-haptic' : 'none'
@@ -45,18 +44,10 @@ const listeners = new Set<() => void>()
 const notify = () => listeners.forEach((l) => l())
 
 function applySession() {
-  // Safari 17+: 'ambient' se mezcla con la música de otras apps (Spotify) pero respeta el modo
-  // silencio; 'playback' suena aunque el iPhone esté en silencio, pero pausa la música
+  // Safari 17+: 'ambient' se mezcla con la música de otras apps (Spotify) en vez de pausarla.
+  // Respeta el modo silencio del iPhone: es la configuración que cada uno tenga puesta.
   const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession
-  if (session) session.type = mixMusic ? 'ambient' : 'playback'
-}
-
-/** Escuchar música de otras apps mientras corre el entreno (solo afecta a iOS) */
-export function setMixMusic(on: boolean) {
-  if (on === mixMusic) return
-  mixMusic = on
-  applySession()
-  if (ctx) stale = true
+  if (session) session.type = 'ambient'
 }
 
 function createContext() {
@@ -64,15 +55,22 @@ function createContext() {
   const c = new Ctor()
   ctx = c
   createdAt = performance.now()
-  stale = false
+  stoppedSince = 0
   master = c.createGain()
   master.connect(c.destination)
   applyVolume()
-  // iOS suspende o "interrumpe" el contexto cuando entra otra app de audio o la app pasa a segundo
-  // plano: se intenta reanudar; si iOS no lo deja sin un toque, se avisa en pantalla (useAudioBlocked)
+  // iOS suspende o "interrumpe" el contexto cada vez que habla la voz, entra otra app de audio o la
+  // app pasa a segundo plano. Se pide reanudarlo en cualquiera de esos estados: en una interrupción,
+  // resume() espera a que acabe (p. ej. a que calle la voz) y entonces vuelve a sonar.
+  // Si sigue parado pasado un rato, se avisa en pantalla (useAudioBlocked).
   c.onstatechange = () => {
     if (c !== ctx) return
-    if (active && c.state === 'suspended') void c.resume().catch(() => {})
+    if (c.state === 'running') stoppedSince = 0
+    else if (!stoppedSince) {
+      stoppedSince = performance.now()
+      setTimeout(notify, BLOCKED_MS + 100)
+    }
+    if (active && c.state !== 'running' && c.state !== 'closed') void c.resume().catch(() => {})
     notify()
   }
   // Recién creado puede tardar un instante en arrancar: el aviso solo cuenta pasado ese margen
@@ -81,6 +79,8 @@ function createContext() {
 
 const FRESH_MS = 1000
 const isFresh = () => performance.now() - createdAt < FRESH_MS
+/** Lo que puede durar una frase de la voz: una parada más corta no es un bloqueo */
+const BLOCKED_MS = 3000
 
 /**
  * Debe llamarse dentro de un gesto del usuario (toque en play): iOS solo permite
@@ -91,7 +91,7 @@ export function unlockAudio() {
 
   // Un contexto que iOS ha dejado parado a veces no vuelve nunca con resume(), y solo se
   // arreglaba reiniciando la app: dentro del toque se cambia por uno nuevo
-  if (ctx && (stale || (ctx.state !== 'running' && !isFresh()))) {
+  if (ctx && ctx.state !== 'running' && !isFresh()) {
     const old = ctx
     const looping = !!keepAlive
     stopLoop()
@@ -177,7 +177,7 @@ function withRunningContext(play: (c: AudioContext, out: GainNode) => void) {
 
 /** Hay un entreno en marcha pero el audio está parado y hace falta un toque para reactivarlo */
 function isBlocked() {
-  return active && !!ctx && ctx.state !== 'running' && !isFresh()
+  return active && !!ctx && ctx.state !== 'running' && !isFresh() && !!stoppedSince && performance.now() - stoppedSince > BLOCKED_MS
 }
 
 function subscribe(cb: () => void) {

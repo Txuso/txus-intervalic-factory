@@ -1,6 +1,6 @@
 import { ChevronRight, Volume2 } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
-import { isIOS, testSound, vibrationSupport } from '../audio/audio'
+import { testSound, vibrationSupport } from '../audio/audio'
 import { Brand } from '../components/Brand'
 import { InstallHint } from '../components/InstallHint'
 import { ScreenHeader } from '../components/ScreenHeader'
@@ -82,11 +82,6 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
           onChange={(vibration) => updateSettings({ vibration })}
         />
       </Row>
-      {isIOS && (
-        <Row title={t.mixMusic} subtitle={t.mixMusicSub}>
-          <Toggle checked={settings.mixMusic} onChange={(mixMusic) => updateSettings({ mixMusic })} />
-        </Row>
-      )}
 
       <div className="border-b border-line px-4 py-4">
         <div className="flex items-center justify-between">

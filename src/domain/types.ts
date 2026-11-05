@@ -51,8 +51,6 @@ export interface Settings {
   /** 0..1 */
   volume: number
   keepAwake: boolean
-  /** iOS: mezclar con la música de otras apps (a cambio, el modo silencio apaga los pitidos) */
-  mixMusic: boolean
   language: Lang
   rock: RockType
 }

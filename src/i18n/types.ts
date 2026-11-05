@@ -100,8 +100,6 @@ export interface Dict {
   beepsSub: string
   voiceTitle: string
   voiceSub: string
-  mixMusic: string
-  mixMusicSub: string
   audioBlocked: string
   vibration: string
   vibrationNote: { native: string; 'ios-haptic': string; none: string }
